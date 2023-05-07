@@ -1,0 +1,3 @@
+[submodule "so3/pyConDec"]
+	path = so3/pyConDec
+	url = git@github.com:eskoruppa/pyConDec
