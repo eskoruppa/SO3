@@ -13,3 +13,6 @@
 **Data/
 **data/
 **DATA/
+
+# ignore egg-info directory
+**.egg-info/
