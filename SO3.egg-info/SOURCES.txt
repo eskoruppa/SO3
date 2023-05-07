@@ -1,0 +1,11 @@
+LICENSE
+README.md
+setup.py
+SO3.egg-info/PKG-INFO
+SO3.egg-info/SOURCES.txt
+SO3.egg-info/dependency_links.txt
+SO3.egg-info/not-zip-safe
+SO3.egg-info/top_level.txt
+so3/SO3Methods.py
+so3/__init__.py
+so3/pyConDec/setup.py

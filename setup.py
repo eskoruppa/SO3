@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(name='SO3',
       version='0.0.1',
@@ -7,8 +7,6 @@ setup(name='SO3',
       author='Enrico Skoruppa',
       author_email='enrico dot skoruppa at gmail dot com',
       license='GNU2',
-      packages=['so3'],
-      package_dir={
-            'so3': 'so3',
-      },
+      packages=find_packages(),
       zip_safe=False) 
+
