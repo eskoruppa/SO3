@@ -76,3 +76,13 @@ def rotmat2euler(R: np.ndarray) -> np.ndarray:
     Theta =  np.array([(R[2,1]-R[1,2]),(R[0,2]-R[2,0]),(R[1,0]-R[0,1])])
     Theta = Th*0.5/np.sin(Th) * Theta
     return Theta
+
+def cayleyvec2rotmat(cayley: np.ndarray) -> np.ndarray:
+    """Generates rotation matrix from Cayley vector
+
+    Args:
+        cayley (np.ndarray): Cayley vector
+
+    Returns:
+        np.ndarray: rotation matrix
+    """
