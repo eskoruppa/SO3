@@ -1,7 +1,7 @@
 #!/bin/env python3
 
 import numpy as np
-from so3 import cond_jit
+from .pyConDec.pycondec import cond_jit
 
 DEF_SO3M_EPSILON             =  1e-12
 DEF_S03M_CLOSE_TO_ONE        =  0.999999999999
