@@ -29,18 +29,3 @@ def rotmat2cayley(rotmat: np.ndarray) -> np.ndarray:
         np.ndarray: returns 3-vector
     """
     return 2./(1+np.trace(rotmat)) * vec_map(rotmat-rotmat.T)
-
-@cond_jit
-def rotx(phi: float):
-    hat = generator1()*phi
-    return np.eye(3) + 4./(4+phi**2) * (hat + 0.5*np.dot(hat,hat))
-
-@cond_jit
-def roty(phi: float):
-    hat = generator2()*phi
-    return np.eye(3) + 4./(4+phi**2) * (hat + 0.5*np.dot(hat,hat))
-
-@cond_jit
-def rotz(phi: float):
-    hat = generator3()*phi
-    return np.eye(3) + 4./(4+phi**2) * (hat + 0.5*np.dot(hat,hat))

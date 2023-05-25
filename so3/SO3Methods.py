@@ -64,6 +64,36 @@ def phi2rotz(phi: float) -> np.ndarray:
     return R
 
 @cond_jit
+def phi2rotx(phi: float) -> np.ndarray:
+    """
+    rotation matrix for rotation over x-axis
+    """
+    cp = np.cos(phi)
+    sp = np.sin(phi)
+    R = np.zeros((3,3),dtype=np.double)    
+    R[1,1] =  cp
+    R[2,2] =  cp
+    R[1,2] = -sp
+    R[2,1] =  sp
+    R[0,0] = 1
+    return R
+
+@cond_jit
+def phi2roty(phi: float) -> np.ndarray:
+    """
+    rotation matrix for rotation over y-axis
+    """
+    cp = np.cos(phi)
+    sp = np.sin(phi)
+    R = np.zeros((3,3),dtype=np.double)    
+    R[2,2] =  cp
+    R[0,0] =  cp
+    R[2,0] = -sp
+    R[0,2] =  sp
+    R[1,1] = 1
+    return R
+
+@cond_jit
 def rotmat2euler(R: np.ndarray) -> np.ndarray:
     """
     Inversion of Euler Rodriguez Formula
