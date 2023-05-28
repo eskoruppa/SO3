@@ -18,6 +18,7 @@ def cayley2euler(cayley: np.ndarray) -> np.ndarray:
     norm = np.linalg.norm(cayley)
     return 2*np.arctan(0.5*norm)/norm * cayley
 
+
 @cond_jit
 def cayley2euler_factor(cayley: np.ndarray) -> float: 
     """Transforms Cayley vector to corresponding Euler vector
@@ -56,3 +57,4 @@ def euler2cayley_factor(euler: np.ndarray) -> float:
     """
     norm = np.linalg.norm(euler)
     return 2*np.tan(0.5*norm)/norm
+
