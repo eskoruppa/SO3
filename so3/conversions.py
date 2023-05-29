@@ -81,3 +81,21 @@ def cayley2euler_linearexpansion(cayley_gs: np.ndarray) -> np.ndarray:
         mat[i,i] += 2*np.arctan(0.5*cnorm)/cnorm
     return mat
 
+def euler2cayley_linearexpansion(euler_gs: np.ndarray) -> np.ndarray:
+    """Linearization of the transformation from Euler to Cayley vector around a given groundstate vector
+
+    Args:
+        cayley_gs (np.ndarray): The Euler vector around which the transformation is linearly expanded
+
+    Returns:
+        float: Linear transformation matrix that transforms small deviations around the given groundstate
+    """
+    enorm = np.linalg.norm(euler_gs)
+    esq = enorm**2
+    fac = 1./esq*( 1./np.cos(0.5*enorm) - 2*np.tan(0.5*enorm)/enorm )
+    mat = np.zeros((3,3))
+    for i in range(3):
+        for j in range(3):
+            mat[i,j] = fac * euler_gs[i] * euler_gs[j]
+        mat[i,i] += 2*np.tan(0.5*enorm)/enorm
+    return mat
