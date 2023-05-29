@@ -1,6 +1,7 @@
 #!/bin/env python3
 
 import numpy as np
+from .generators import hat_map
 from .pyConDec.pycondec import cond_jit
 # from .generators import hat_map, vec_map, generator1, generator2, generator3
 
