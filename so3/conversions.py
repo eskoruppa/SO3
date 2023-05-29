@@ -63,6 +63,7 @@ def euler2cayley_factor(euler: np.ndarray) -> float:
 ############### Linear Transformations based on linear expansion #########################################
 ##########################################################################################################
 
+@cond_jit
 def cayley2euler_linearexpansion(cayley_gs: np.ndarray) -> np.ndarray:
     """Linearization of the transformation from Cayley to Euler vector around a given groundstate vector
 
@@ -82,6 +83,7 @@ def cayley2euler_linearexpansion(cayley_gs: np.ndarray) -> np.ndarray:
         mat[i,i] += 2*np.arctan(0.5*cnorm)/cnorm
     return mat
 
+@cond_jit
 def euler2cayley_linearexpansion(euler_gs: np.ndarray) -> np.ndarray:
     """Linearization of the transformation from Euler to Cayley vector around a given groundstate vector
 
