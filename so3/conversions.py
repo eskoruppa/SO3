@@ -125,6 +125,9 @@ def splittransform_group2algebra(Theta_0: np.ndarray) -> np.ndarray:
 
     hthetasq_dot = np.dot(htheta,htheta)
 
+
+    print(hthetasq)
+    print(hthetasq_dot)
     print(hthetasq-hthetasq_dot)
     import sys
     sys.exit()
