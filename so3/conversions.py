@@ -122,6 +122,13 @@ def splittransform_group2algebra(Theta_0: np.ndarray) -> np.ndarray:
     """
     htheta = hat_map(Theta_0)
     hthetasq = np.matmul(htheta,htheta)
+
+    hthetasq_dot = np.dot(htheta,htheta)
+
+    print(hthetasq-hthetasq_dot)
+    import sys
+    sys.exit()
+
     accutheta = np.copy(htheta)
     # first order
     T = np.eye(3)
