@@ -99,3 +99,69 @@ def euler2cayley_linearexpansion(euler_gs: np.ndarray) -> np.ndarray:
             mat[i,j] = fac * euler_gs[i] * euler_gs[j]
         mat[i,i] += 2*np.tan(0.5*enorm)/enorm
     return mat
+
+
+##########################################################################################################
+############### Change Splitting between static and dynamic components ###################################
+##########################################################################################################
+
+def splittransform_group2algebra(Theta_0: np.ndarray) -> np.ndarray:
+    """
+    Linear transformation that maps dynamic component in group splitting representation 
+    (R = D*S = exp(hat(Theta_0))exp(hat(Delta))), with D,S \in SO(3) to lie algebra splitting 
+    representation R = exp(hat(Theta_0) + hat(Delta')). Linear transformation T transforms Delta
+    into Delta' as T*Delta = Delta'.
+
+    Args:
+        Theta_0 (np.ndarray): static rotational component expressed in Axis angle parametrization (Euler vector)
+        Has to be expressed in radians
+
+    Returns:
+        float: Linear transformation matrix T (3x3) that transforms Delta into Delta': T*Delta = Delta'
+    """
+    htheta = hat_map(Theta_0)
+    accutheta = np.copy(htheta)
+    # first order
+    T = np.eye(3)
+    # seconds order
+    T += 0.5 * accutheta
+    # third order
+    accutheta = np.matmul(accutheta,htheta)
+    T += 1./12 * accutheta
+    # fifth order
+    accutheta = np.matmul(accutheta,htheta)
+    accutheta = np.matmul(accutheta,htheta)
+    T += -1./720 * accutheta
+    # seventh order
+    accutheta = np.matmul(accutheta,htheta)
+    accutheta = np.matmul(accutheta,htheta)
+    T += 1./30240 * accutheta
+    # ninth order
+    accutheta = np.matmul(accutheta,htheta)
+    accutheta = np.matmul(accutheta,htheta)
+    T += -1./1209600 * accutheta
+    # eleventh order
+    accutheta = np.matmul(accutheta,htheta)
+    accutheta = np.matmul(accutheta,htheta)
+    T += 1./47900160 * accutheta
+    # thirteenth order
+    accutheta = np.matmul(accutheta,htheta)
+    accutheta = np.matmul(accutheta,htheta)
+    T += -691./1307674368000 * accutheta
+    return T
+
+def splittransform_algebra2group(Theta_0: np.ndarray) -> np.ndarray:
+    """
+    Linear transformation that maps dynamic component in lie algebra splitting representation R = exp(hat(Theta_0) + hat(Delta')) to group splitting representation 
+    (R = D*S = exp(hat(Theta_0))exp(hat(Delta))), with D,S \in SO(3) t. Linear transformation T transforms Delta
+    into Delta' as T'*Delta' = Delta. Currently this is defined as the inverse of the transformation
+    defined in the method splittransform_group2algebra
+
+    Args:
+        Theta_0 (np.ndarray): static rotational component expressed in Axis angle parametrization (Euler vector)
+        Has to be expressed in radians
+
+    Returns:
+        float: Linear transformation matrix T' (3x3) that transforms Delta into Delta': T'*Delta' = Delta
+    """
+    return np.linalg.inv(splittransform_group2algebra(Theta_0))

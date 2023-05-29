@@ -13,6 +13,7 @@ from .Euler import euler2rotmat, rotmat2euler
 from .conversions import cayley2euler, cayley2euler_factor
 from .conversions import euler2cayley, euler2cayley_factor
 from .conversions import cayley2euler_linearexpansion, euler2cayley_linearexpansion
+from .conversions import splittransform_group2algebra, splittransform_algebra2group
 
 
 # legacy method
