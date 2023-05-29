@@ -106,6 +106,7 @@ def euler2cayley_linearexpansion(euler_gs: np.ndarray) -> np.ndarray:
 ############### Change Splitting between static and dynamic components ###################################
 ##########################################################################################################
 
+@cond_jit
 def splittransform_group2algebra(Theta_0: np.ndarray) -> np.ndarray:
     """
     Linear transformation that maps dynamic component in group splitting representation 
@@ -121,16 +122,8 @@ def splittransform_group2algebra(Theta_0: np.ndarray) -> np.ndarray:
         float: Linear transformation matrix T (3x3) that transforms Delta into Delta': T*Delta = Delta'
     """
     htheta = hat_map(Theta_0)
-    hthetasq = np.matmul(htheta,htheta)
-
-    hthetasq_dot = np.dot(htheta,htheta)
-
-
-    print(hthetasq)
-    print(hthetasq_dot)
-    print(hthetasq-hthetasq_dot)
-    import sys
-    sys.exit()
+    # hthetasq = np.matmul(htheta,htheta)
+    hthetasq = np.dot(htheta,htheta)
 
     accutheta = np.copy(htheta)
     # first order
@@ -138,25 +131,32 @@ def splittransform_group2algebra(Theta_0: np.ndarray) -> np.ndarray:
     # seconds order
     T += 0.5 * accutheta
     # third order
-    accutheta = np.matmul(accutheta,htheta)
+    # accutheta = np.matmul(accutheta,htheta)
+    accutheta = np.dot(accutheta,htheta)
     T += 1./12 * accutheta
     # fifth order
-    accutheta = np.matmul(accutheta,hthetasq)
+    # accutheta = np.matmul(accutheta,htheta)
+    accutheta = np.dot(accutheta,htheta)
     T += -1./720 * accutheta
     # seventh order
-    accutheta = np.matmul(accutheta,hthetasq)
+    # accutheta = np.matmul(accutheta,htheta)
+    accutheta = np.dot(accutheta,htheta)
     T += 1./30240 * accutheta
     # ninth order
-    accutheta = np.matmul(accutheta,hthetasq)
+    # accutheta = np.matmul(accutheta,htheta)
+    accutheta = np.dot(accutheta,htheta)
     T += -1./1209600 * accutheta
     # eleventh order
-    accutheta = np.matmul(accutheta,hthetasq)
+    # accutheta = np.matmul(accutheta,htheta)
+    accutheta = np.dot(accutheta,htheta)
     T += 1./47900160 * accutheta
     # thirteenth order
-    accutheta = np.matmul(accutheta,hthetasq)
+    # accutheta = np.matmul(accutheta,htheta)
+    accutheta = np.dot(accutheta,htheta)
     T += -691./1307674368000 * accutheta
     return T
 
+@cond_jit
 def splittransform_algebra2group(Theta_0: np.ndarray) -> np.ndarray:
     """
     Linear transformation that maps dynamic component in lie algebra splitting representation R = exp(hat(Theta_0) + hat(Delta')) to group splitting representation 
