@@ -63,7 +63,6 @@ def euler2cayley_factor(euler: np.ndarray) -> float:
 ############### Linear Transformations based on linear expansion #########################################
 ##########################################################################################################
 
-@cond_jit
 def cayley2euler_linearexpansion(cayley_gs: np.ndarray) -> np.ndarray:
     """Linearization of the transformation from Cayley to Euler vector around a given groundstate vector
 
@@ -83,7 +82,6 @@ def cayley2euler_linearexpansion(cayley_gs: np.ndarray) -> np.ndarray:
         mat[i,i] += 2*np.arctan(0.5*cnorm)/cnorm
     return mat
 
-@cond_jit
 def euler2cayley_linearexpansion(euler_gs: np.ndarray) -> np.ndarray:
     """Linearization of the transformation from Euler to Cayley vector around a given groundstate vector
 
@@ -108,7 +106,6 @@ def euler2cayley_linearexpansion(euler_gs: np.ndarray) -> np.ndarray:
 ############### Change Splitting between static and dynamic components ###################################
 ##########################################################################################################
 
-@cond_jit
 def splittransform_group2algebra(Theta_0: np.ndarray) -> np.ndarray:
     """
     Linear transformation that maps dynamic component in group splitting representation 
@@ -150,7 +147,6 @@ def splittransform_group2algebra(Theta_0: np.ndarray) -> np.ndarray:
     T += -691./1307674368000 * accutheta
     return T
 
-@cond_jit
 def splittransform_algebra2group(Theta_0: np.ndarray) -> np.ndarray:
     """
     Linear transformation that maps dynamic component in lie algebra splitting representation R = exp(hat(Theta_0) + hat(Delta')) to group splitting representation 
