@@ -14,7 +14,7 @@ from .conversions import cayley2euler, cayley2euler_factor
 from .conversions import euler2cayley, euler2cayley_factor
 from .conversions import cayley2euler_linearexpansion, euler2cayley_linearexpansion
 from .conversions import splittransform_group2algebra, splittransform_algebra2group
-
+from .marices import dots
 
 # legacy method
 from .SO3Methods  import  phi2rotx, phi2roty, phi2rotz
