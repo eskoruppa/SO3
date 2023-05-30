@@ -14,6 +14,16 @@ from .conversions import cayley2euler, cayley2euler_factor
 from .conversions import euler2cayley, euler2cayley_factor
 from .conversions import cayley2euler_linearexpansion, euler2cayley_linearexpansion
 from .conversions import splittransform_group2algebra, splittransform_algebra2group
+
+from .transforms import statevec2vecs, vecs2statevec, eulers2rotmats, rotmats2eulers
+from .transforms import eulers2rotmats_SO3fluct
+from .transforms import cayleys2rotmats, rotmats2cayleys, vecs2rotmats, rotmats2vecs
+from .transforms import rotmats2triads, triads2rotmats
+from .transforms import triads2positions
+from .transforms import eulers2cayleys, cayleys2eulers, cayleys2eulers_lintrans, eulers2cayleys_lintrans
+from .transforms import splittransform_group2algebra, splittransform_algebra2group
+
+
 from .matrices import dots
 
 # legacy method
