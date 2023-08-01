@@ -8,7 +8,7 @@ DEF_EULER_EPSILON             =  1e-12
 DEF_EULER_CLOSE_TO_ONE        =  0.999999999999
 DEF_EULER_CLOSE_TO_MINUS_ONE  = -0.999999999999
 
-@cond_jit
+# @cond_jit
 def euler2rotmat(Omega: np.ndarray) -> np.ndarray:
     """Returns the matrix version of the Euler-Rodrigues formula
 
@@ -49,7 +49,7 @@ def euler2rotmat(Omega: np.ndarray) -> np.ndarray:
     R[2,1] = A+B
     return R
 
-@cond_jit
+# @cond_jit
 def rotmat2euler(R: np.ndarray) -> np.ndarray:
     """Inversion of Euler Rodriguez Formula
 
