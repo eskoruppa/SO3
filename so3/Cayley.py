@@ -3,7 +3,7 @@
 import numpy as np
 from .pyConDec.pycondec import cond_jit
 
-from .generators import hat_map, vec_map, generator1, generator2, generator3
+from .generators import hat_map, vec_map #, generator1, generator2, generator3
 
 @cond_jit
 def cayley2rotmat(cayley: np.ndarray) -> np.ndarray:
