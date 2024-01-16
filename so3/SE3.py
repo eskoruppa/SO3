@@ -51,14 +51,7 @@ def se3_transformation_normal2midsteptrans(g: np.ndarray) -> np.ndarray:
     """transforms translation of transformation g (in SE3) from canonical definition to mid-step triad definition.
     """
     midg = np.copy(g)
-    # print(g)
-    # print(midg)
-    
     midg[:3,3] = np.transpose(sqrt_rot(g[:3,:3])) @ g[:3,3]
-    
-    import sys
-    sys.exit()
-    
     return midg
 
 @cond_jit
