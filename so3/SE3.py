@@ -33,7 +33,7 @@ def se3_triads2rotmat_midsteptrans(tau1: np.ndarray, tau2: np.ndarray) -> np.nda
     R = T1.T @ T2
     Tmid = T1 @ sqrt_rot(R)
     zeta = Tmid.T @ (tau2[:3,3]-tau1[:3,3])
-    g = np.ones(4)
+    g = np.eye(4)
     g[:3,:3] = R
     g[:3,3]  = zeta
     return g
