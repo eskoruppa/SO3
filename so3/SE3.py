@@ -46,7 +46,7 @@ def se3_triads2rotmat_midsteptrans(tau1: np.ndarray, tau2: np.ndarray) -> np.nda
     g[:3,3]  = zeta
     return g
 
-# @cond_jit
+@cond_jit
 def se3_transformation_normal2midsteptrans(g: np.ndarray) -> np.ndarray:
     """transforms translation of transformation g (in SE3) from canonical definition to mid-step triad definition.
     """
