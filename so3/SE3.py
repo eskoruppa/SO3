@@ -39,5 +39,18 @@ def se3_triads2rotmat_midsteptrans(tau1: np.ndarray, tau2: np.ndarray) -> np.nda
     return g
 
 @cond_jit
+def se3_triad_normal2midsteptrans(g: np.ndarray) -> np.ndarray:
+    midg = np.copy(g)
+    midg[:3,3] = sqrt_rot(g[:3,:3]).T @ g[:3,3]
+    return midg
+
+@cond_jit
+def se3_triad_midsteptrans2normal(midg: np.ndarray) -> np.ndarray:
+    g = np.copy(midg)
+    g[:3,3] = sqrt_rot(midg[:3,:3]) @ midg[:3,3]
+    return g
+
+@cond_jit
 def sqrt_rot(R: np.ndarray) -> np.ndarray:
     return euler2rotmat(0.5*rotmat2euler(R))
+
