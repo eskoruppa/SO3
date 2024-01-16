@@ -67,4 +67,3 @@ def sqrt_rot(R: np.ndarray) -> np.ndarray:
     """generates rotation matrix that corresponds to a rotation over the same axis, but over half the angle.
     """
     return euler2rotmat(0.5*rotmat2euler(R))
-
