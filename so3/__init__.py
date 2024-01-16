@@ -17,7 +17,7 @@ from .conversions import cayley2euler_linearexpansion, euler2cayley_linearexpans
 from .conversions import splittransform_group2algebra, splittransform_algebra2group
 from .matrices import dots
 from .SE3 import se3_inverse, se3_triads2rotmat, sqrt_rot
-from .SE3 import se3_triadxrotmat_midsteptrans, se3_triads2rotmat_midsteptrans, se3_triad_normal2midsteptrans, se3_triad_midsteptrans2normal
+from .SE3 import se3_triadxrotmat_midsteptrans, se3_triads2rotmat_midsteptrans, se3_normal2midsteptrans, se3_midsteptrans2normal
 
 # legacy method
 from .SO3Methods  import  phi2rotx, phi2roty, phi2rotz
