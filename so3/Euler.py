@@ -82,7 +82,7 @@ def rotmat2euler(R: np.ndarray) -> np.ndarray:
 ############### SE3 Methods ##############################################################################
 ##########################################################################################################
 
-def euler2rotmat_se3(Omega: np.ndarray, rotation_first: bool = True) -> np.ndarray:
+def se3_euler2rotmat(Omega: np.ndarray, rotation_first: bool = True) -> np.ndarray:
     if Omega.shape != (6,):
         raise ValueError(f'Expected shape (6,) array, but encountered {Omega.shape}.')
     if rotation_first:
@@ -97,7 +97,7 @@ def euler2rotmat_se3(Omega: np.ndarray, rotation_first: bool = True) -> np.ndarr
     rotmat[3,3]   = 1
     return rotmat
 
-def rotmat2euler_se3(R: np.ndarray, rotation_first: bool = True) -> np.ndarray:
+def se3_rotmat2euler(R: np.ndarray, rotation_first: bool = True) -> np.ndarray:
     if R.shape != (4,4):
         raise ValueError(f'Expected shape (4,4) array, but encountered {R.shape}.')
     vrot = rotmat2euler(R[:3,:3])

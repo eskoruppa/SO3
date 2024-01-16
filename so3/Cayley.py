@@ -38,7 +38,7 @@ def rotmat2cayley(rotmat: np.ndarray) -> np.ndarray:
 ############### SE3 Methods ##############################################################################
 ##########################################################################################################
 
-def cayley2rotmat_se3(Omega: np.ndarray, rotation_first: bool = True) -> np.ndarray:
+def se3_cayley2rotmat(Omega: np.ndarray, rotation_first: bool = True) -> np.ndarray:
     if Omega.shape != (6,):
         raise ValueError(f'Expected shape (6,) array, but encountered {Omega.shape}.')
     if rotation_first:
@@ -53,7 +53,7 @@ def cayley2rotmat_se3(Omega: np.ndarray, rotation_first: bool = True) -> np.ndar
     rotmat[3,3]   = 1
     return rotmat
 
-def rotmat2cayley_se3(R: np.ndarray, rotation_first: bool = True) -> np.ndarray:
+def se3_rotmat2cayley(R: np.ndarray, rotation_first: bool = True) -> np.ndarray:
     if R.shape != (4,4):
         raise ValueError(f'Expected shape (4,4) array, but encountered {R.shape}.')
     vrot = rotmat2cayley(R[:3,:3])
