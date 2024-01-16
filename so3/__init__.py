@@ -2,7 +2,7 @@
 SO3
 =====
 
-A package for various rotation operationss
+A package for various rotation operations
 
 """
 
