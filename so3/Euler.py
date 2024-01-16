@@ -8,7 +8,11 @@ DEF_EULER_EPSILON             =  1e-12
 DEF_EULER_CLOSE_TO_ONE        =  0.999999999999
 DEF_EULER_CLOSE_TO_MINUS_ONE  = -0.999999999999
 
-# @cond_jit
+##########################################################################################################
+############### SO3 Methods ##############################################################################
+##########################################################################################################
+
+@cond_jit
 def euler2rotmat(Omega: np.ndarray) -> np.ndarray:
     """Returns the matrix version of the Euler-Rodrigues formula
 
@@ -49,7 +53,7 @@ def euler2rotmat(Omega: np.ndarray) -> np.ndarray:
     R[2,1] = A+B
     return R
 
-# @cond_jit
+@cond_jit
 def rotmat2euler(R: np.ndarray) -> np.ndarray:
     """Inversion of Euler Rodriguez Formula
 
@@ -72,3 +76,33 @@ def rotmat2euler(R: np.ndarray) -> np.ndarray:
     Theta =  np.array([(R[2,1]-R[1,2]),(R[0,2]-R[2,0]),(R[1,0]-R[0,1])])
     Theta = Th*0.5/np.sin(Th) * Theta
     return Theta
+
+
+##########################################################################################################
+############### SE3 Methods ##############################################################################
+##########################################################################################################
+
+def euler2rotmat_se3(Omega: np.ndarray, rotation_first: bool = True) -> np.ndarray:
+    if Omega.shape != (6,):
+        raise ValueError(f'Expected shape (6,) array, but encountered {Omega.shape}.')
+    if rotation_first:
+        vrot = Omega[:3]
+        vtrans = Omega[3:]
+    else:
+        vrot = Omega[3:]
+        vtrans = Omega[:3]
+    rotmat = np.zeros((4,4))
+    rotmat[:3,:3] = euler2rotmat(vrot)
+    rotmat[:3,3]  = vtrans
+    rotmat[3,3]   = 1
+    return rotmat
+
+def rotmat2euler(R: np.ndarray, rotation_first: bool = True) -> np.ndarray:
+    if R.shape != (4,4):
+        raise ValueError(f'Expected shape (4,4) array, but encountered {R.shape}.')
+    vrot = rotmat2euler(R[:3,:3])
+    vtrans = R[:3,3]
+    if rotation_first: 
+        return np.concatenate((vrot,vtrans))
+    else:
+        return np.concatenate((vtrans,vrot))

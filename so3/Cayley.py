@@ -5,6 +5,10 @@ from .pyConDec.pycondec import cond_jit
 
 from .generators import hat_map, vec_map #, generator1, generator2, generator3
 
+##########################################################################################################
+############### SO3 Methods ##############################################################################
+##########################################################################################################
+
 @cond_jit
 def cayley2rotmat(cayley: np.ndarray) -> np.ndarray:
     """Transforms cayley vector to corresponding rotation matrix
@@ -29,3 +33,32 @@ def rotmat2cayley(rotmat: np.ndarray) -> np.ndarray:
         np.ndarray: returns 3-vector
     """
     return 2./(1+np.trace(rotmat)) * vec_map(rotmat-rotmat.T)
+
+##########################################################################################################
+############### SE3 Methods ##############################################################################
+##########################################################################################################
+
+def cayley2rotmat_se3(Omega: np.ndarray, rotation_first: bool = True) -> np.ndarray:
+    if Omega.shape != (6,):
+        raise ValueError(f'Expected shape (6,) array, but encountered {Omega.shape}.')
+    if rotation_first:
+        vrot = Omega[:3]
+        vtrans = Omega[3:]
+    else:
+        vrot = Omega[3:]
+        vtrans = Omega[:3]
+    rotmat = np.zeros((4,4))
+    rotmat[:3,:3] = cayley2rotmat(vrot)
+    rotmat[:3,3]  = vtrans
+    rotmat[3,3]   = 1
+    return rotmat
+
+def rotmat2cayley(R: np.ndarray, rotation_first: bool = True) -> np.ndarray:
+    if R.shape != (4,4):
+        raise ValueError(f'Expected shape (4,4) array, but encountered {R.shape}.')
+    vrot = rotmat2cayley(R[:3,:3])
+    vtrans = R[:3,3]
+    if rotation_first:
+        return np.concatenate((vrot,vtrans))
+    else:
+        return np.concatenate((vtrans,vrot))
