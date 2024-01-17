@@ -124,39 +124,67 @@ def splittransform_group2algebra(Theta_0: np.ndarray) -> np.ndarray:
         float: Linear transformation matrix T (3x3) that transforms Delta into Delta': T*Delta = Delta'
     """
     htheta = hat_map(Theta_0)
-    # hthetasq = np.matmul(htheta,htheta)
     hthetasq = np.dot(htheta,htheta)
 
     accutheta = np.copy(htheta)
-    # first order
+    # zeroth order
     T = np.eye(3)
-    # seconds order
+    # first order
     T += 0.5 * accutheta
-    # third order
-    # accutheta = np.matmul(accutheta,htheta)
+    # second order
     accutheta = np.dot(accutheta,htheta)
     T += 1./12 * accutheta
-    # fifth order
-    # accutheta = np.matmul(accutheta,htheta)
-    accutheta = np.dot(accutheta,htheta)
+    # fourth order
+    accutheta = np.dot(accutheta,hthetasq)
     T += -1./720 * accutheta
-    # seventh order
-    # accutheta = np.matmul(accutheta,htheta)
-    accutheta = np.dot(accutheta,htheta)
+    # sixth order
+    accutheta = np.dot(accutheta,hthetasq)
     T += 1./30240 * accutheta
-    # ninth order
-    # accutheta = np.matmul(accutheta,htheta)
-    accutheta = np.dot(accutheta,htheta)
+    # eighth order
+    accutheta = np.dot(accutheta,hthetasq)
     T += -1./1209600 * accutheta
-    # eleventh order
-    # accutheta = np.matmul(accutheta,htheta)
-    accutheta = np.dot(accutheta,htheta)
+    # tenth order
+    accutheta = np.dot(accutheta,hthetasq)
     T += 1./47900160 * accutheta
-    # thirteenth order
-    # accutheta = np.matmul(accutheta,htheta)
-    accutheta = np.dot(accutheta,htheta)
+    # twelth order
+    accutheta = np.dot(accutheta,hthetasq)
     T += -691./1307674368000 * accutheta
     return T
+
+    # htheta = hat_map(Theta_0)
+    # # hthetasq = np.matmul(htheta,htheta)
+    # hthetasq = np.dot(htheta,htheta)
+
+    # accutheta = np.copy(htheta)
+    # # first order
+    # T = np.eye(3)
+    # # seconds order
+    # T += 0.5 * accutheta
+    # # third order
+    # # accutheta = np.matmul(accutheta,htheta)
+    # accutheta = np.dot(accutheta,htheta)
+    # T += 1./12 * accutheta
+    # # fifth order
+    # # accutheta = np.matmul(accutheta,htheta)
+    # accutheta = np.dot(accutheta,htheta)
+    # T += -1./720 * accutheta
+    # # seventh order
+    # # accutheta = np.matmul(accutheta,htheta)
+    # accutheta = np.dot(accutheta,htheta)
+    # T += 1./30240 * accutheta
+    # # ninth order
+    # # accutheta = np.matmul(accutheta,htheta)
+    # accutheta = np.dot(accutheta,htheta)
+    # T += -1./1209600 * accutheta
+    # # eleventh order
+    # # accutheta = np.matmul(accutheta,htheta)
+    # accutheta = np.dot(accutheta,htheta)
+    # T += 1./47900160 * accutheta
+    # # thirteenth order
+    # # accutheta = np.matmul(accutheta,htheta)
+    # accutheta = np.dot(accutheta,htheta)
+    # T += -691./1307674368000 * accutheta
+    # return T
 
 @cond_jit
 def splittransform_algebra2group(Theta_0: np.ndarray) -> np.ndarray:
