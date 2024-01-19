@@ -47,7 +47,7 @@ def se3_triads2rotmat_midsteptrans(tau1: np.ndarray, tau2: np.ndarray) -> np.nda
     return g
 
 @cond_jit
-def se3_transformation_normal2midsteptrans(g: np.ndarray) -> np.ndarray:
+def se3_transformation_triad2midstep(g: np.ndarray) -> np.ndarray:
     """transforms translation of transformation g (in SE3) from canonical definition to mid-step triad definition.
     """
     midg = np.copy(g)
@@ -55,7 +55,7 @@ def se3_transformation_normal2midsteptrans(g: np.ndarray) -> np.ndarray:
     return midg
 
 @cond_jit
-def se3_transformation_midsteptrans2normal(midg: np.ndarray) -> np.ndarray:
+def se3_transformation_midstep2triad(midg: np.ndarray) -> np.ndarray:
     """transforms translation of transformation g (in SE3) from mid-step triad definition to canonical definition.
     """
     g = np.copy(midg)
