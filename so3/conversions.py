@@ -110,7 +110,7 @@ def euler2cayley_linearexpansion(euler_gs: np.ndarray) -> np.ndarray:
     euler_norm    = np.linalg.norm(euler_gs)
     euler_norm_sq = euler_norm**2
     ratio_cayley_euler = 2*np.tan(0.5*euler_norm)/euler_norm
-    fac = (np.sec(0.5*euler_norm) - ratio_cayley_euler) / euler_norm_sq
+    fac = (1./(np.cos(0.5*euler_norm))**2 - ratio_cayley_euler) / euler_norm_sq
     return np.eye(3) * ratio_cayley_euler + np.outer(euler_gs,euler_gs) * fac
     
     # enorm = np.linalg.norm(euler_gs)
