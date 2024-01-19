@@ -85,6 +85,20 @@ def cayley2euler_linearexpansion(cayley_gs: np.ndarray) -> np.ndarray:
     cayley_norm_sq = cayley_norm**2
     ratio_euler_cayley = 2*np.arctan(0.5*cayley_norm)/cayley_norm
     fac = (4./(4+cayley_norm_sq) - ratio_euler_cayley) / cayley_norm_sq
+    
+    mat1 = np.eye(3) * ratio_euler_cayley + np.outer(cayley_gs,cayley_gs) * fac
+    
+    cnorm = np.linalg.norm(cayley_gs)
+    csq = cnorm**2
+    fac = 2./csq*(2./(4+csq) - np.arctan(cnorm/2)/cnorm)
+    mat = np.zeros((3,3))
+    for i in range(3):
+        for j in range(3):
+            mat[i,j] = fac * cayley_gs[i] * cayley_gs[j]
+        mat[i,i] += 2*np.arctan(0.5*cnorm)/cnorm
+    
+    print(mat-mat1)
+    
     return np.eye(3) * ratio_euler_cayley + np.outer(cayley_gs,cayley_gs) * fac
     
     # cnorm = np.linalg.norm(cayley_gs)
