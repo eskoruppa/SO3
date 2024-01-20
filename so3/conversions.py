@@ -122,8 +122,8 @@ def euler2cayley_linearexpansion(euler_gs: np.ndarray) -> np.ndarray:
     #         mat[i,j] = fac * euler_gs[i] * euler_gs[j]
     #     mat[i,i] += 2*np.tan(0.5*enorm)/enorm
     # return mat
-
-
+    
+    
 ##########################################################################################################
 ############### Change Splitting between static and dynamic components ###################################
 ##########################################################################################################
