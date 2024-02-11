@@ -30,20 +30,25 @@ def euler2rotmat(Omega: np.ndarray) -> np.ndarray:
     cosOm = np.cos(Om)
     sinOm = np.sin(Om)
     Omsq  = Om*Om
+    cosOm = np.cos(Om)
+    sinOm = np.sin(Om)
+    Omsq  = Om*Om
+    fac1 = (1-cosOm)/Omsq
+    fac2 = sinOm/Om
 
-    R[0,0] = cosOm+Omega[0]**2/Omsq*(1-cosOm)
-    R[1,1] = cosOm+Omega[1]**2/Omsq*(1-cosOm)
-    R[2,2] = cosOm+Omega[2]**2/Omsq*(1-cosOm)
-    A = Omega[0]*Omega[1]/Omsq*(1-cosOm)
-    B = Omega[2]/Om*sinOm
+    R[0,0] = cosOm+Omega[0]**2*fac1
+    R[1,1] = cosOm+Omega[1]**2*fac1
+    R[2,2] = cosOm+Omega[2]**2*fac1
+    A = Omega[0]*Omega[1]*fac1
+    B = Omega[2]*fac2
     R[0,1] = A-B
     R[1,0] = A+B
-    A = Omega[0]*Omega[2]/Omsq*(1-cosOm)
-    B = Omega[1]/Om*sinOm
+    A = Omega[0]*Omega[2]*fac1
+    B = Omega[1]*fac2
     R[0,2] = A+B
     R[2,0] = A-B
-    A = Omega[1]*Omega[2]/Omsq*(1-cosOm)
-    B = Omega[0]/Om*sinOm
+    A = Omega[1]*Omega[2]*fac1
+    B = Omega[0]*fac2
     R[1,2] = A-B
     R[2,1] = A+B
     return R

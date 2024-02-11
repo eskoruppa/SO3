@@ -3,7 +3,7 @@
 import numpy as np
 from typing import List
 from .pyConDec.pycondec import cond_jit
-from .Euler import euler2rotmat, rotmat2euler
+from .Euler import euler2rotmat, rotmat2euler, se3_rotmat2euler
 
 @cond_jit
 def se3_inverse(g: np.ndarray) -> np.ndarray:
@@ -20,6 +20,10 @@ def se3_triads2rotmat(tau1: np.ndarray, tau2: np.ndarray) -> np.ndarray:
     """find SE3 transformation matrix, g, that maps tau1 into tau2 with respect to the frame of tau1
     """
     return se3_inverse(tau1)@tau2
+
+@cond_jit
+def se3_triads2euler(tau1: np.ndarray, tau2: np.ndarray) -> np.ndarray:
+    return se3_rotmat2euler(se3_triads2rotmat(tau1,tau2))
 
 @cond_jit
 def se3_triadxrotmat_midsteptrans(tau1: np.ndarray, g: np.ndarray) -> np.ndarray:
