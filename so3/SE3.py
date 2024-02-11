@@ -4,6 +4,8 @@ import numpy as np
 from typing import List
 from .pyConDec.pycondec import cond_jit
 from .Euler import euler2rotmat, rotmat2euler, se3_rotmat2euler
+from .conversions import splittransform_algebra2group, splittransform_group2algebra
+from .generators import hat_map
 
 @cond_jit
 def se3_inverse(g: np.ndarray) -> np.ndarray:
@@ -89,3 +91,48 @@ def sqrt_rot(R: np.ndarray) -> np.ndarray:
     """generates rotation matrix that corresponds to a rotation over the same axis, but over half the angle.
     """
     return euler2rotmat(0.5*rotmat2euler(R))
+
+@cond_jit
+def se3_algebra2group_lintrans(
+    groundstate_algebra: np.ndarray, 
+    translation_as_midstep: bool = False
+) -> np.ndarray:
+    
+    Trans = np.eye(6)
+    Omega_0 = groundstate_algebra[:3]
+    zeta_0  = groundstate_algebra[3:]
+
+    Trans[:3,:3] = splittransform_algebra2group(Omega_0)
+    if translation_as_midstep:
+        sqrtS_transp = euler2rotmat(-0.5*Omega_0)
+        zeta_0_hat_transp = hat_map(-zeta_0)    
+        H_half = splittransform_algebra2group(0.5*Omega_0)
+        Trans[3:,:3] = 0.5 * sqrtS_transp @ zeta_0_hat_transp @ H_half
+        Trans[3:,3:] = sqrtS_transp
+    else:
+        Trans[3:,3:] = euler2rotmat(-Omega_0)
+    return Trans
+
+@cond_jit
+def se3_group2algebra_lintrans(
+    groundstate_group: np.ndarray, 
+    translation_as_midstep: bool = False
+    ) -> np.ndarray:
+    
+    Trans = np.eye(6)
+    Phi_0 = groundstate_group[:3]
+    s     = groundstate_group[3:]
+    
+    H_inv = splittransform_group2algebra(Phi_0)    
+    Trans[:3,:3] = H_inv
+    if translation_as_midstep:
+        sqrtS = euler2rotmat(0.5*Phi_0)
+        zeta_0 = sqrtS.T @ s
+        zeta_0_hat_transp = hat_map(-zeta_0)    
+        H_half = splittransform_algebra2group(0.5*Phi_0)
+        Trans[3:,:3] = -0.5 * zeta_0_hat_transp @ H_half @ H_inv
+        Trans[3:,3:] = sqrtS
+    else:
+        Trans[3:,3:] = euler2rotmat(Phi_0)
+    return Trans
+
