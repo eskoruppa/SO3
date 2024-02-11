@@ -118,27 +118,6 @@ def se3_algebra2group_lintrans(
         Trans[3:,3:] = euler2rotmat(-Omega_0)
     return Trans
 
-def se3_algebra2group_stiffmat(
-    groundstate_algebra: np.ndarray, 
-    stiff_algebra: np.ndarray, 
-    translation_as_midstep: bool = False
-    ) -> np.ndarray:
-    """Converts stiffness matrix from algebra-level (vector) splitting between static and dynamic component to group-level (matrix) splitting. Optionally, the transformations from midstep triad definition to triad definition of the translational component may also be included.  
-    """ 
-    HX = se3_algebra2group_lintrans(
-        groundstate_algebra,
-        translation_as_midstep=translation_as_midstep
-    )
-    HX_inv = np.linalg.inv(HX)
-    stiff_group = HX_inv.T @ stiff_algebra @ HX_inv
-    return stiff_group
-
-
-##########################################################################################################
-##########################################################################################################
-##########################################################################################################
-
-
 @cond_jit
 def se3_group2algebra_lintrans(
     groundstate_group: np.ndarray, 
@@ -162,6 +141,27 @@ def se3_group2algebra_lintrans(
         Trans[3:,3:] = euler2rotmat(Phi_0)
     return Trans
 
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+
+@cond_jit
+def se3_algebra2group_stiffmat(
+    groundstate_algebra: np.ndarray, 
+    stiff_algebra: np.ndarray, 
+    translation_as_midstep: bool = False
+    ) -> np.ndarray:
+    """Converts stiffness matrix from algebra-level (vector) splitting between static and dynamic component to group-level (matrix) splitting. Optionally, the transformations from midstep triad definition to triad definition of the translational component may also be included.  
+    """ 
+    HX = se3_algebra2group_lintrans(
+        groundstate_algebra,
+        translation_as_midstep=translation_as_midstep
+    )
+    HX_inv = np.linalg.inv(HX)
+    stiff_group = HX_inv.T @ stiff_algebra @ HX_inv
+    return stiff_group
+
+@cond_jit
 def se3_group2algebra_stiffmat(
     groundstate_group: np.ndarray, 
     stiff_group: np.ndarray, 
