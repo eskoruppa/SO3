@@ -113,6 +113,14 @@ def se3_algebra2group_lintrans(
         zeta_0_hat_transp = hat_map(-zeta_0)    
         H_half = splittransform_algebra2group(0.5*Omega_0)
         Trans[3:,:3] = 0.5 * sqrtS_transp @ zeta_0_hat_transp @ H_half
+        
+        print('##############')
+        print(sqrtS_transp)
+        print(zeta_0_hat_transp)
+        print(H_half)
+        print(Trans[3:,:3])
+        print('##############')
+        
         Trans[3:,3:] = sqrtS_transp
     else:
         Trans[3:,3:] = euler2rotmat(-Omega_0)
