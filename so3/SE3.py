@@ -26,6 +26,24 @@ def se3_triads2euler(tau1: np.ndarray, tau2: np.ndarray) -> np.ndarray:
     return se3_rotmat2euler(se3_triads2rotmat(tau1,tau2))
 
 @cond_jit
+def se3_triad2midstep(midstep_euler: np.ndarray) -> np.ndarray:
+    triad_euler = np.copy(midstep_euler)
+    vrot = midstep_euler[:3]
+    vtrans = midstep_euler[3:]
+    sqrt_rotmat = euler2rotmat(0.5*vrot)
+    triad_euler[3:] = sqrt_rotmat @ vtrans
+    return triad_euler
+
+@cond_jit
+def se3_midstep2triad(triad_euler: np.ndarray) -> np.ndarray:
+    midstep_euler = np.copy(triad_euler)
+    vrot = triad_euler[:3]
+    vtrans = triad_euler[3:]
+    sqrt_rotmat = euler2rotmat(0.5*vrot)
+    midstep_euler[3:] = sqrt_rotmat.T @ vtrans
+    return midstep_euler
+
+@cond_jit
 def se3_triadxrotmat_midsteptrans(tau1: np.ndarray, g: np.ndarray) -> np.ndarray:
     """Multiplication of triad with rotation matrix g (in SE3) assuming that the translation of g is defined with respect to the midstep triad.
     """
