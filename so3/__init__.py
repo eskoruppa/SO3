@@ -20,6 +20,7 @@ from .SE3 import se3_inverse, se3_triads2rotmat, se3_triads2euler, sqrt_rot
 from .SE3 import se3_triadxrotmat_midsteptrans, se3_triads2rotmat_midsteptrans, se3_transformation_triad2midstep, se3_transformation_midstep2triad
 from .SE3 import se3_triad2midstep, se3_midstep2triad
 from .SE3 import se3_algebra2group_lintrans, se3_group2algebra_lintrans
+from .SE3 import se3_algebra2group_stiffmat, se3_group2algebra_stiffmat
 
 
 # legacy method

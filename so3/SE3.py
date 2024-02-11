@@ -92,6 +92,11 @@ def sqrt_rot(R: np.ndarray) -> np.ndarray:
     """
     return euler2rotmat(0.5*rotmat2euler(R))
 
+
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+
 @cond_jit
 def se3_algebra2group_lintrans(
     groundstate_algebra: np.ndarray, 
@@ -112,6 +117,27 @@ def se3_algebra2group_lintrans(
     else:
         Trans[3:,3:] = euler2rotmat(-Omega_0)
     return Trans
+
+def se3_algebra2group_stiffmat(
+    groundstate_algebra: np.ndarray, 
+    stiff_algebra: np.ndarray, 
+    translation_as_midstep: bool = False
+    ) -> np.ndarray:
+    """Converts stiffness matrix from algebra-level (vector) splitting between static and dynamic component to group-level (matrix) splitting. Optionally, the transformations from midstep triad definition to triad definition of the translational component may also be included.  
+    """ 
+    HX = se3_algebra2group_lintrans(
+        groundstate_algebra,
+        translation_as_midstep=translation_as_midstep
+    )
+    HX_inv = np.linalg.inv(HX)
+    stiff_group = HX_inv.T @ stiff_algebra @ HX_inv
+    return stiff_group
+
+
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+
 
 @cond_jit
 def se3_group2algebra_lintrans(
@@ -135,4 +161,24 @@ def se3_group2algebra_lintrans(
     else:
         Trans[3:,3:] = euler2rotmat(Phi_0)
     return Trans
+
+def se3_group2algebra_stiffmat(
+    groundstate_group: np.ndarray, 
+    stiff_group: np.ndarray, 
+    translation_as_midstep: bool = False
+    ) -> np.ndarray:
+    """Converts stiffness matrix from group-level (matrix) splitting between static and dynamic component to algebra-level (vector) splitting. Optionally, the transformations from midstep triad definition to triad definition of the translational component may also be included. I.e. the final 
+    definition will assume a midstep triad definition of the translational component. 
+    """ 
+    HX_inv = se3_group2algebra_lintrans(
+        groundstate_group,
+        translation_as_midstep=translation_as_midstep
+    )
+    HX = np.linalg.inv(HX_inv)
+    stiff_algebra = HX.T @ stiff_group @ HX
+    return stiff_algebra
+
+
+
+
 
