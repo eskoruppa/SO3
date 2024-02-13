@@ -16,7 +16,8 @@ from .conversions import euler2cayley, euler2cayley_factor
 from .conversions import cayley2euler_linearexpansion, euler2cayley_linearexpansion
 from .conversions import splittransform_group2algebra, splittransform_algebra2group
 from .matrices import dots
-from .SE3 import se3_inverse, se3_triads2rotmat, se3_triads2euler, sqrt_rot
+from .Euler import sqrt_rot, midstep
+from .SE3 import se3_inverse, se3_triads2rotmat, se3_triads2euler
 from .SE3 import se3_triadxrotmat_midsteptrans, se3_triads2rotmat_midsteptrans, se3_transformation_triad2midstep, se3_transformation_midstep2triad
 from .SE3 import se3_triad2midstep, se3_midstep2triad
 from .SE3 import se3_algebra2group_lintrans, se3_group2algebra_lintrans

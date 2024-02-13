@@ -2,6 +2,7 @@
 
 import numpy as np
 from .pyConDec.pycondec import cond_jit
+from .SE3 import sqrt_rot
 
 
 DEF_EULER_EPSILON             =  1e-12
@@ -79,14 +80,28 @@ def rotmat2euler(R: np.ndarray) -> np.ndarray:
     Theta = Th*0.5/np.sin(Th) * Theta
     return Theta
 
+#########################################################################################################
+############## sqrt of rotation matrix ##################################################################
+#########################################################################################################
+
+@cond_jit
+def sqrt_rot(R: np.ndarray) -> np.ndarray:
+    """generates rotation matrix that corresponds to a rotation over the same axis, but over half the angle.
+    """
+    return euler2rotmat(0.5*rotmat2euler(R))
+
+@cond_jit
+def midstep(triad1: np.ndarray, triad2: np.ndarray) -> np.ndarray:
+    return triad1 @ sqrt_rot(triad1.T @ triad2)
 
 ##########################################################################################################
 ############### SE3 Methods ##############################################################################
 ##########################################################################################################
 
+@cond_jit
 def se3_euler2rotmat(Omega: np.ndarray, rotation_first: bool = True) -> np.ndarray:
-    if Omega.shape != (6,):
-        raise ValueError(f'Expected shape (6,) array, but encountered {Omega.shape}.')
+    # if Omega.shape != (6,):
+    #     raise ValueError(f'Expected shape (6,) array, but encountered {Omega.shape}.')
     if rotation_first:
         vrot = Omega[:3]
         vtrans = Omega[3:]
@@ -99,9 +114,10 @@ def se3_euler2rotmat(Omega: np.ndarray, rotation_first: bool = True) -> np.ndarr
     rotmat[3,3]   = 1
     return rotmat
 
+@cond_jit
 def se3_rotmat2euler(R: np.ndarray, rotation_first: bool = True) -> np.ndarray:
-    if R.shape != (4,4):
-        raise ValueError(f'Expected shape (4,4) array, but encountered {R.shape}.')
+    # if R.shape != (4,4):
+    #     raise ValueError(f'Expected shape (4,4) array, but encountered {R.shape}.')
     vrot = rotmat2euler(R[:3,:3])
     vtrans = R[:3,3]
     if rotation_first: 

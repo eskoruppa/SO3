@@ -6,6 +6,7 @@ from .pyConDec.pycondec import cond_jit
 from .Euler import euler2rotmat, rotmat2euler, se3_rotmat2euler
 from .conversions import splittransform_algebra2group, splittransform_group2algebra
 from .generators import hat_map
+from .Euler import sqrt_rot
 
 @cond_jit
 def se3_inverse(g: np.ndarray) -> np.ndarray:
@@ -85,12 +86,6 @@ def se3_transformation_midstep2triad(midg: np.ndarray) -> np.ndarray:
     g = np.copy(midg)
     g[:3,3] = sqrt_rot(midg[:3,:3]) @ midg[:3,3]
     return g
-
-@cond_jit
-def sqrt_rot(R: np.ndarray) -> np.ndarray:
-    """generates rotation matrix that corresponds to a rotation over the same axis, but over half the angle.
-    """
-    return euler2rotmat(0.5*rotmat2euler(R))
 
 
 ##########################################################################################################
