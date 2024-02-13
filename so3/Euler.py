@@ -2,7 +2,6 @@
 
 import numpy as np
 from .pyConDec.pycondec import cond_jit
-from .SE3 import sqrt_rot
 
 
 DEF_EULER_EPSILON             =  1e-12
