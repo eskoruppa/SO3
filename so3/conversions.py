@@ -1,13 +1,15 @@
 #!/bin/env python3
 
 import numpy as np
+
 from .generators import hat_map
 from .pyConDec.pycondec import cond_jit
+
 # from .generators import hat_map, vec_map, generator1, generator2, generator3
 
 
 @cond_jit
-def cayley2euler(cayley: np.ndarray) -> np.ndarray: 
+def cayley2euler(cayley: np.ndarray) -> np.ndarray:
     """Transforms Cayley vector to corresponding Euler vector
 
     Args:
@@ -19,11 +21,11 @@ def cayley2euler(cayley: np.ndarray) -> np.ndarray:
     norm = np.linalg.norm(cayley)
     if np.abs(norm) < 1e-14:
         return np.zeros(3)
-    return 2*np.arctan(0.5*norm)/norm * cayley
+    return 2 * np.arctan(0.5 * norm) / norm * cayley
 
 
 @cond_jit
-def cayley2euler_factor(cayley: np.ndarray) -> float: 
+def cayley2euler_factor(cayley: np.ndarray) -> float:
     """Transforms Cayley vector to corresponding Euler vector
 
     Args:
@@ -35,10 +37,11 @@ def cayley2euler_factor(cayley: np.ndarray) -> float:
     norm = np.linalg.norm(cayley)
     if np.abs(norm) < 1e-14:
         return np.zeros(3)
-    return 2*np.arctan(0.5*norm)/norm
+    return 2 * np.arctan(0.5 * norm) / norm
+
 
 @cond_jit
-def euler2cayley(euler: np.ndarray) -> np.ndarray: 
+def euler2cayley(euler: np.ndarray) -> np.ndarray:
     """Transforms Euler vector to corresponding Cayley vector
 
     Args:
@@ -50,10 +53,11 @@ def euler2cayley(euler: np.ndarray) -> np.ndarray:
     norm = np.linalg.norm(euler)
     if np.abs(norm) < 1e-14:
         return np.zeros(3)
-    return 2*np.tan(0.5*norm)/norm * euler
+    return 2 * np.tan(0.5 * norm) / norm * euler
+
 
 @cond_jit
-def euler2cayley_factor(euler: np.ndarray) -> float: 
+def euler2cayley_factor(euler: np.ndarray) -> float:
     """Transforms Euler vector to corresponding Cayley vector
 
     Args:
@@ -65,11 +69,13 @@ def euler2cayley_factor(euler: np.ndarray) -> float:
     norm = np.linalg.norm(euler)
     if np.abs(norm) < 1e-14:
         return np.zeros(3)
-    return 2*np.tan(0.5*norm)/norm
+    return 2 * np.tan(0.5 * norm) / norm
+
 
 ##########################################################################################################
 ############### Linear Transformations based on linear expansion #########################################
 ##########################################################################################################
+
 
 @cond_jit
 def cayley2euler_linearexpansion(cayley_gs: np.ndarray) -> np.ndarray:
@@ -81,12 +87,12 @@ def cayley2euler_linearexpansion(cayley_gs: np.ndarray) -> np.ndarray:
     Returns:
         float: Linear transformation matrix that transforms small deviations around the given groundstate
     """
-    cayley_norm    = np.linalg.norm(cayley_gs)
+    cayley_norm = np.linalg.norm(cayley_gs)
     cayley_norm_sq = cayley_norm**2
-    ratio_euler_cayley = 2*np.arctan(0.5*cayley_norm)/cayley_norm
-    fac = (4./(4+cayley_norm_sq) - ratio_euler_cayley) / cayley_norm_sq
-    return np.eye(3) * ratio_euler_cayley + np.outer(cayley_gs,cayley_gs) * fac
-    
+    ratio_euler_cayley = 2 * np.arctan(0.5 * cayley_norm) / cayley_norm
+    fac = (4.0 / (4 + cayley_norm_sq) - ratio_euler_cayley) / cayley_norm_sq
+    return np.eye(3) * ratio_euler_cayley + np.outer(cayley_gs, cayley_gs) * fac
+
     # cnorm = np.linalg.norm(cayley_gs)
     # csq = cnorm**2
     # fac = 2./csq*(2./(4+csq) - np.arctan(cnorm/2)/cnorm)
@@ -96,6 +102,7 @@ def cayley2euler_linearexpansion(cayley_gs: np.ndarray) -> np.ndarray:
     #         mat[i,j] = fac * cayley_gs[i] * cayley_gs[j]
     #     mat[i,i] += 2*np.arctan(0.5*cnorm)/cnorm
     # return mat
+
 
 @cond_jit
 def euler2cayley_linearexpansion(euler_gs: np.ndarray) -> np.ndarray:
@@ -107,12 +114,12 @@ def euler2cayley_linearexpansion(euler_gs: np.ndarray) -> np.ndarray:
     Returns:
         float: Linear transformation matrix that transforms small deviations around the given groundstate
     """
-    euler_norm    = np.linalg.norm(euler_gs)
+    euler_norm = np.linalg.norm(euler_gs)
     euler_norm_sq = euler_norm**2
-    ratio_cayley_euler = 2*np.tan(0.5*euler_norm)/euler_norm
-    fac = (1./(np.cos(0.5*euler_norm))**2 - ratio_cayley_euler) / euler_norm_sq
-    return np.eye(3) * ratio_cayley_euler + np.outer(euler_gs,euler_gs) * fac
-    
+    ratio_cayley_euler = 2 * np.tan(0.5 * euler_norm) / euler_norm
+    fac = (1.0 / (np.cos(0.5 * euler_norm)) ** 2 - ratio_cayley_euler) / euler_norm_sq
+    return np.eye(3) * ratio_cayley_euler + np.outer(euler_gs, euler_gs) * fac
+
     # enorm = np.linalg.norm(euler_gs)
     # esq = enorm**2
     # fac = 1./esq*( 1./np.cos(0.5*enorm) - 2*np.tan(0.5*enorm)/enorm )
@@ -122,17 +129,18 @@ def euler2cayley_linearexpansion(euler_gs: np.ndarray) -> np.ndarray:
     #         mat[i,j] = fac * euler_gs[i] * euler_gs[j]
     #     mat[i,i] += 2*np.tan(0.5*enorm)/enorm
     # return mat
-    
-    
+
+
 ##########################################################################################################
 ############### Change Splitting between static and dynamic components ###################################
 ##########################################################################################################
 
+
 @cond_jit
 def splittransform_group2algebra(Theta_0: np.ndarray) -> np.ndarray:
     """
-    Linear transformation that maps dynamic component in group splitting representation 
-    (R = D*S = exp(hat(Theta_0))exp(hat(Delta))), with D,S \in SO(3) to lie algebra splitting 
+    Linear transformation that maps dynamic component in group splitting representation
+    (R = D*S = exp(hat(Theta_0))exp(hat(Delta))), with D,S \in SO(3) to lie algebra splitting
     representation R = exp(hat(Theta_0) + hat(Delta')). Linear transformation T transforms Delta
     into Delta' as T*Delta = Delta'.
 
@@ -144,7 +152,7 @@ def splittransform_group2algebra(Theta_0: np.ndarray) -> np.ndarray:
         float: Linear transformation matrix T (3x3) that transforms Delta into Delta': T*Delta = Delta'
     """
     htheta = hat_map(Theta_0)
-    hthetasq = np.dot(htheta,htheta)
+    hthetasq = np.dot(htheta, htheta)
 
     accutheta = np.copy(htheta)
     # zeroth order
@@ -152,23 +160,23 @@ def splittransform_group2algebra(Theta_0: np.ndarray) -> np.ndarray:
     # first order
     T += 0.5 * accutheta
     # second order
-    accutheta = np.dot(accutheta,htheta)
-    T += 1./12 * accutheta
+    accutheta = np.dot(accutheta, htheta)
+    T += 1.0 / 12 * accutheta
     # fourth order
-    accutheta = np.dot(accutheta,hthetasq)
-    T += -1./720 * accutheta
+    accutheta = np.dot(accutheta, hthetasq)
+    T += -1.0 / 720 * accutheta
     # sixth order
-    accutheta = np.dot(accutheta,hthetasq)
-    T += 1./30240 * accutheta
+    accutheta = np.dot(accutheta, hthetasq)
+    T += 1.0 / 30240 * accutheta
     # eighth order
-    accutheta = np.dot(accutheta,hthetasq)
-    T += -1./1209600 * accutheta
+    accutheta = np.dot(accutheta, hthetasq)
+    T += -1.0 / 1209600 * accutheta
     # tenth order
-    accutheta = np.dot(accutheta,hthetasq)
-    T += 1./47900160 * accutheta
+    accutheta = np.dot(accutheta, hthetasq)
+    T += 1.0 / 47900160 * accutheta
     # twelth order
-    accutheta = np.dot(accutheta,hthetasq)
-    T += -691./1307674368000 * accutheta
+    accutheta = np.dot(accutheta, hthetasq)
+    T += -691.0 / 1307674368000 * accutheta
     return T
 
     # htheta = hat_map(Theta_0)
@@ -206,10 +214,11 @@ def splittransform_group2algebra(Theta_0: np.ndarray) -> np.ndarray:
     # T += -691./1307674368000 * accutheta
     # return T
 
+
 @cond_jit
 def splittransform_algebra2group(Theta_0: np.ndarray) -> np.ndarray:
     """
-    Linear transformation that maps dynamic component in lie algebra splitting representation R = exp(hat(Theta_0) + hat(Delta')) to group splitting representation 
+    Linear transformation that maps dynamic component in lie algebra splitting representation R = exp(hat(Theta_0) + hat(Delta')) to group splitting representation
     (R = D*S = exp(hat(Theta_0))exp(hat(Delta))), with D,S \in SO(3) t. Linear transformation T transforms Delta
     into Delta' as T'*Delta' = Delta. Currently this is defined as the inverse of the transformation
     defined in the method splittransform_group2algebra

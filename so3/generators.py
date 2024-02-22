@@ -1,6 +1,7 @@
 #!/bin/env python3
 
 import numpy as np
+
 from .pyConDec.pycondec import cond_jit
 
 
@@ -14,14 +15,15 @@ def hat_map(x: np.ndarray) -> np.ndarray:
     Returns:
         np.ndarray: rotation amtrix (element of SO(3))
     """
-    X = np.zeros((3,3))
-    X[0,1] = -x[2]
-    X[1,0] =  x[2]
-    X[0,2] =  x[1]
-    X[2,0] = -x[1]
-    X[1,2] = -x[0]
-    X[2,1] =  x[0]
+    X = np.zeros((3, 3))
+    X[0, 1] = -x[2]
+    X[1, 0] = x[2]
+    X[0, 2] = x[1]
+    X[2, 0] = -x[1]
+    X[1, 2] = -x[0]
+    X[2, 1] = x[0]
     return X
+
 
 @cond_jit
 def vec_map(X: np.ndarray) -> np.ndarray:
@@ -33,7 +35,8 @@ def vec_map(X: np.ndarray) -> np.ndarray:
     Returns:
         np.ndarray: rotation vector (3-vector)
     """
-    return np.array([X[2,1],X[0,2],X[1,0]])
+    return np.array([X[2, 1], X[0, 2], X[1, 0]])
+
 
 @cond_jit
 def generator1() -> np.ndarray:
@@ -42,11 +45,12 @@ def generator1() -> np.ndarray:
     Returns:
         np.ndarray: L1
     """
-    X = np.zeros((3,3))
-    X[1,2] = -1
-    X[2,1] =  1
+    X = np.zeros((3, 3))
+    X[1, 2] = -1
+    X[2, 1] = 1
     return X
-    
+
+
 @cond_jit
 def generator2() -> np.ndarray:
     """first generator of SO(3)
@@ -54,10 +58,11 @@ def generator2() -> np.ndarray:
     Returns:
         np.ndarray: L1
     """
-    X = np.zeros((3,3))
-    X[0,2] =  1
-    X[2,0] = -1
+    X = np.zeros((3, 3))
+    X[0, 2] = 1
+    X[2, 0] = -1
     return X
+
 
 @cond_jit
 def generator3() -> np.ndarray:
@@ -66,9 +71,7 @@ def generator3() -> np.ndarray:
     Returns:
         np.ndarray: L1
     """
-    X = np.zeros((3,3))
-    X[0,1] = -1
-    X[1,0] =  1
+    X = np.zeros((3, 3))
+    X[0, 1] = -1
+    X[1, 0] = 1
     return X
-    
-    
