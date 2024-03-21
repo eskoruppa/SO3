@@ -57,6 +57,30 @@ def euler2rotmat(Omega: np.ndarray) -> np.ndarray:
     return R
 
 
+# @cond_jit
+# def rotmat2euler(R: np.ndarray) -> np.ndarray:
+#     """Inversion of Euler Rodriguez Formula
+
+#     Args:
+#         R (np.ndarray): Rotation matrix (element of SO(3))
+
+#     Returns:
+#         np.ndarray: Euler vector / Rotation vector (3-vector)
+#     """
+#     val = 0.5 * (np.trace(R) - 1)
+#     if val > DEF_EULER_CLOSE_TO_ONE:
+#         return np.zeros(3)
+#     if val < DEF_EULER_CLOSE_TO_MINUS_ONE:
+#         if R[0, 0] > DEF_EULER_CLOSE_TO_ONE:
+#             return np.array([np.pi, 0, 0])
+#         if R[1, 1] > DEF_EULER_CLOSE_TO_ONE:
+#             return np.array([0, np.pi, 0])
+#         return np.array([0, 0, np.pi])
+#     Th = np.arccos(val)
+#     Theta = np.array([(R[2, 1] - R[1, 2]), (R[0, 2] - R[2, 0]), (R[1, 0] - R[0, 1])])
+#     Theta = Th * 0.5 / np.sin(Th) * Theta
+#     return Theta
+
 @cond_jit
 def rotmat2euler(R: np.ndarray) -> np.ndarray:
     """Inversion of Euler Rodriguez Formula
@@ -71,11 +95,21 @@ def rotmat2euler(R: np.ndarray) -> np.ndarray:
     if val > DEF_EULER_CLOSE_TO_ONE:
         return np.zeros(3)
     if val < DEF_EULER_CLOSE_TO_MINUS_ONE:
+        # rotation around first axis by angle pi
         if R[0, 0] > DEF_EULER_CLOSE_TO_ONE:
             return np.array([np.pi, 0, 0])
+        # rotation around second axis by angle pi
         if R[1, 1] > DEF_EULER_CLOSE_TO_ONE:
             return np.array([0, np.pi, 0])
-        return np.array([0, 0, np.pi])
+        # rotation around third axis by angle pi
+        if R[2, 2] > DEF_EULER_CLOSE_TO_ONE:
+            return np.array([0, 0, np.pi])
+        # rotation around arbitrary axis by angle pi
+        A = R - np.eye(3)       
+        b = np.cross(A[0],A[1])
+        th = b - np.dot(b,A[2])*A[2]
+        th = th / np.linalg.norm(th) * np.pi
+        return th
     Th = np.arccos(val)
     Theta = np.array([(R[2, 1] - R[1, 2]), (R[0, 2] - R[2, 0]), (R[1, 0] - R[0, 1])])
     Theta = Th * 0.5 / np.sin(Th) * Theta
