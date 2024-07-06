@@ -25,6 +25,7 @@ from .Euler import (
     se3_rotmat2euler,
     sqrt_rot,
 )
+from .extend_euler import extend_euler
 from .generators import generator1, generator2, generator3, hat_map, vec_map
 from .matrices import dots
 from .pyConDec.pycondec import cond_jit
