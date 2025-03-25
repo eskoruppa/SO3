@@ -28,10 +28,7 @@ def euler2rotmat(Omega: np.ndarray) -> np.ndarray:
 
     # if norm is zero, return identity matrix
     if Om < DEF_EULER_EPSILON:
-        R[0, 0] = 1
-        R[1, 1] = 1
-        R[2, 2] = 1
-        return R
+        return np.eye(3)
 
     cosOm = np.cos(Om)
     sinOm = np.sin(Om)
