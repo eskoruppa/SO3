@@ -1,5 +1,22 @@
 import numpy as np
+from .pyConDec.pycondec import cond_jit
+import warnings
 
+def depdec(repl=None):
+    def decorator(func):
+        msg = f"{func.__name__} is deprecated."
+        if repl:
+            msg += f" Use {repl} instead."
+
+        def wrapper(*args, **kwargs):
+            warnings.warn(msg, DeprecationWarning, stacklevel=2)
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+
+@depdec(repl="quat2mat_numba")
+@cond_jit(nopython=True,cache=True)
 def _quat2rotmat(quat: np.ndarray) -> np.ndarray:
     """
     Converts a quaternion to a 3x3 rotation matrix, populating
@@ -20,9 +37,9 @@ def _quat2rotmat(quat: np.ndarray) -> np.ndarray:
     Raises:
         ValueError: If the input 'quat' is not a 1D NumPy array of 4 elements.
     """
-    if not isinstance(quat, np.ndarray) or quat.shape != (4,):
-        print(quat.shape)
-        raise ValueError("Input 'quat' must be a 1D NumPy array of 4 elements ([w, i, j, k]).")
+    # if not isinstance(quat, np.ndarray) or quat.shape != (4,):
+    #     print(quat.shape)
+    #     raise ValueError("Input 'quat' must be a 1D NumPy array of 4 elements ([w, i, j, k]).")
 
     # Extract quaternion components
     w = quat[0]
@@ -66,7 +83,8 @@ def _quat2rotmat(quat: np.ndarray) -> np.ndarray:
 
     return mat.T
 
-
+@depdec(repl="quats2mats_numba")
+@cond_jit(nopython=True,cache=True)
 def quats2rotmats(quaternions_array: np.ndarray) -> np.ndarray:
     """
     Converts a NumPy array of quaternions (num_snapshots x num_atoms x 4)
@@ -91,10 +109,10 @@ def quats2rotmats(quaternions_array: np.ndarray) -> np.ndarray:
     Raises:
         ValueError: If the input array does not have the expected shape (N, A, 4).
     """
-    if not isinstance(quaternions_array, np.ndarray) or quaternions_array.ndim != 3 or quaternions_array.shape[2] != 4:
-        raise ValueError(
-            "Input 'quaternions_array' must be a 3D NumPy array of shape (num_snapshots, num_atoms, 4)."
-        )
+    # if not isinstance(quaternions_array, np.ndarray) or quaternions_array.ndim != 3 or quaternions_array.shape[2] != 4:
+    #     raise ValueError(
+    #         "Input 'quaternions_array' must be a 3D NumPy array of shape (num_snapshots, num_atoms, 4)."
+    #     )
 
     num_snapshots, num_atoms, _ = quaternions_array.shape
 
@@ -110,27 +128,19 @@ def quats2rotmats(quaternions_array: np.ndarray) -> np.ndarray:
     return triads_array
 
 
-def quat2mat(quat):
-    """
-    Convert a quaternion to a 3x3 rotation matrix.
 
-    Parameters
-    ----------
-    quat : sequence of float
-        The quaternion [w, i, j, k].
-
-    Returns
-    -------
-    mat : list of list of float
-        The corresponding 3x3 rotation matrix.
-    """
-    w, i, j, k = quat
+@cond_jit(nopython=True, cache=True)
+def quat2mat_numba(quat):
+    """Numba core: quaternion (4,) -> rotation matrix (3,3), row-major like original."""
+    w = quat[0]
+    i = quat[1]
+    j = quat[2]
+    k = quat[3]
 
     w2 = w * w
     i2 = i * i
     j2 = j * j
     k2 = k * k
-
     twoij = 2.0 * i * j
     twoik = 2.0 * i * k
     twojk = 2.0 * j * k
@@ -138,70 +148,145 @@ def quat2mat(quat):
     twojw = 2.0 * j * w
     twokw = 2.0 * k * w
 
-    mat = [
-        [w2 + i2 - j2 - k2, twoij - twokw,     twojw + twoik    ],
-        [twoij + twokw,     w2 - i2 + j2 - k2, twojk - twoiw    ],
-        [twoik - twojw,     twojk + twoiw,     w2 - i2 - j2 + k2]
-    ]
+    mat = np.empty((3, 3), dtype=np.float64)
+
+    # row 0
+    mat[0, 0] = w2 + i2 - j2 - k2
+    mat[0, 1] = twoij - twokw
+    mat[0, 2] = twojw + twoik
+
+    # row 1
+    mat[1, 0] = twoij + twokw
+    mat[1, 1] = w2 - i2 + j2 - k2
+    mat[1, 2] = twojk - twoiw
+
+    # row 2
+    mat[2, 0] = twoik - twojw
+    mat[2, 1] = twojk + twoiw
+    mat[2, 2] = w2 - i2 - j2 + k2
 
     return mat
 
 
-def mat2quat(mat):
-    """
-    Convert a 3×3 rotation matrix to a quaternion [w, x, y, z].
-    
-    Parameters
-    ----------
-    mat : sequence of sequence of float
-        3×3 rotation matrix, mat[row][col].
-    
-    Returns
-    -------
-    q : list of float
-        Quaternion [w, x, y, z].
-    """
-    np.trace(mat)
-    # Compute the “squares” terms
-    q0sq = 0.25 * (np.trace(mat) + 1.0)
-    q1sq = q0sq - 0.5 * (mat[1,1] + mat[2,2])
-    q2sq = q0sq - 0.5 * (mat[0,0] + mat[2,2])
-    q3sq = q0sq - 0.5 * (mat[0,0] + mat[1,1])
+@cond_jit(nopython=True, cache=True)
+def mat2quat_numba(mat):
+    """Numba core: rotation matrix (3,3) -> quaternion (4,) [w, x, y, z]."""
+    m00 = mat[0, 0]
+    m01 = mat[0, 1]
+    m02 = mat[0, 2]
+    m10 = mat[1, 0]
+    m11 = mat[1, 1]
+    m12 = mat[1, 2]
+    m20 = mat[2, 0]
+    m21 = mat[2, 1]
+    m22 = mat[2, 2]
 
-    # Prepare quaternion array
-    q = np.zeros(4,dtype=np.double)
+    tr = m00 + m11 + m22
 
-    # Choose the largest component to ensure numerical stability
+    q0sq = 0.25 * (tr + 1.0)
+    q1sq = q0sq - 0.5 * (m11 + m22)
+    q2sq = q0sq - 0.5 * (m00 + m22)
+    q3sq = q0sq - 0.5 * (m00 + m11)
+
+    q0 = 0.0
+    q1 = 0.0
+    q2 = 0.0
+    q3 = 0.0
+
     if q0sq >= 0.25:
-        q[0] = np.sqrt(q0sq)
-        denom = 1. / (4.0 * q[0])
-        q[1] = (mat[2,1] - mat[1,2]) * denom
-        q[2] = (mat[0,2] - mat[2,0]) * denom
-        q[3] = (mat[1,0] - mat[0,1]) * denom
+        q0 = np.sqrt(q0sq)
+        denom = 1.0 / (4.0 * q0)
+        q1 = (m21 - m12) * denom
+        q2 = (m02 - m20) * denom
+        q3 = (m10 - m01) * denom
     elif q1sq >= 0.25:
-        q[1] = np.sqrt(q1sq)
-        denom = 1. / (4.0 * q[1])
-        q[0] = (mat[2,1] - mat[1,2]) * denom
-        q[2] = (mat[0,1] + mat[1,0]) * denom
-        q[3] = (mat[2,0] + mat[0,2]) * denom
+        q1 = np.sqrt(q1sq)
+        denom = 1.0 / (4.0 * q1)
+        q0 = (m21 - m12) * denom
+        q2 = (m01 + m10) * denom
+        q3 = (m20 + m02) * denom
     elif q2sq >= 0.25:
-        q[2] = np.sqrt(q2sq)
-        denom = 1. / (4.0 * q[2])
-        q[0] = (mat[0,2] - mat[2,0]) * denom
-        q[1] = (mat[0,1] + mat[1,0]) * denom
-        q[3] = (mat[1,2] + mat[2,1]) * denom
+        q2 = np.sqrt(q2sq)
+        denom = 1.0 / (4.0 * q2)
+        q0 = (m02 - m20) * denom
+        q1 = (m01 + m10) * denom
+        q3 = (m12 + m21) * denom
     else:
-        q[3] = np.sqrt(q3sq)
-        denom = 1. / (4.0 * q[3])
-        q[0] = (mat[1,0] - mat[0,1]) * denom
-        q[1] = (mat[0,2] + mat[2,0]) * denom
-        q[2] = (mat[1,2] + mat[2,1]) * denom
+        q3 = np.sqrt(q3sq)
+        denom = 1.0 / (4.0 * q3)
+        q0 = (m10 - m01) * denom
+        q1 = (m02 + m20) * denom
+        q2 = (m12 + m21) * denom
 
-    # Normalize to unit length
-    norm = np.linalg.norm(q)
+    q = np.empty(4, dtype=np.float64)
+    q[0] = q0
+    q[1] = q1
+    q[2] = q2
+    q[3] = q3
+
+    norm = np.sqrt(q0*q0 + q1*q1 + q2*q2 + q3*q3)
     if norm > 0.0:
-        q = q / norm
+        inv = 1.0 / norm
+        q[0] *= inv
+        q[1] *= inv
+        q[2] *= inv
+        q[3] *= inv
+
     return q
+
+
+# ----------------------------------------------------------------------
+# Batch cores (Numba-compiled, directly callable)
+# ----------------------------------------------------------------------
+
+@cond_jit(nopython=True, cache=True)
+def quats2mats_numba(quats, mats_out):
+    N = quats.shape[0]
+    for n in range(N):
+        mats_out[n] = quat2mat_numba(quats[n])
+
+
+@cond_jit(nopython=True, cache=True)
+def mats2quats_numba(mats, quats_out):
+    N = mats.shape[0]
+    for n in range(N):
+        quats_out[n] = mat2quat_numba(mats[n])
+
+
+def quat2mat(quat) -> np.ndarray:
+    q = np.asarray(quat, dtype=np.float64)
+    if q.shape != (4,):
+        raise ValueError("Input 'quat' must be a 1D array-like of length 4.")
+    return quat2mat_numba(q)
+
+
+def mat2quat(mat) -> np.ndarray:
+    m = np.asarray(mat, dtype=np.float64)
+    if m.shape != (3, 3):
+        raise ValueError("Input 'mat' must have shape (3, 3).")
+    return mat2quat_numba(m)
+
+
+def quats2mats(quats: np.ndarray) -> np.ndarray:
+    quats = np.asarray(quats, dtype=np.float64)
+    if quats.ndim != 2 or quats.shape[1] != 4:
+        raise ValueError("Input 'quats' must have shape (N, 4).")
+
+    N = quats.shape[0]
+    mats = np.empty((N, 3, 3), dtype=np.float64)
+    quats2mats_numba(quats, mats)
+    return mats
+
+
+def mats2quats(mats: np.ndarray) -> np.ndarray:
+    mats = np.asarray(mats, dtype=np.float64)
+    if mats.ndim != 3 or mats.shape[1:] != (3, 3):
+        raise ValueError("Input 'mats' must have shape (N, 3, 3).")
+
+    N = mats.shape[0]
+    quats = np.empty((N, 4), dtype=np.float64)
+    mats2quats_numba(mats, quats)
+    return quats
 
 
 
@@ -222,3 +307,6 @@ if __name__ == '__main__':
     R2 = _quat2rotmat(q)
     
     print(R1-R2)
+    print(R-R2)
+
+

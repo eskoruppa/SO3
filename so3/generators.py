@@ -5,7 +5,7 @@ import numpy as np
 from .pyConDec.pycondec import cond_jit
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def hat_map(x: np.ndarray) -> np.ndarray:
     """Maps rotation vectors (Euler vectors) onto the corresponding elements of so(3).
 
@@ -25,7 +25,7 @@ def hat_map(x: np.ndarray) -> np.ndarray:
     return X
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def vec_map(X: np.ndarray) -> np.ndarray:
     """Inverse of the hat map. Maps elements of so(3) onto the corresponding Euler vectors.
 
@@ -38,7 +38,7 @@ def vec_map(X: np.ndarray) -> np.ndarray:
     return np.array([X[2, 1], X[0, 2], X[1, 0]])
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def generator1() -> np.ndarray:
     """first generator of SO(3)
 
@@ -51,7 +51,7 @@ def generator1() -> np.ndarray:
     return X
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def generator2() -> np.ndarray:
     """first generator of SO(3)
 
@@ -64,7 +64,7 @@ def generator2() -> np.ndarray:
     return X
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def generator3() -> np.ndarray:
     """first generator of SO(3)
 

@@ -8,7 +8,7 @@ from .pyConDec.pycondec import cond_jit
 # from .generators import hat_map, vec_map, generator1, generator2, generator3
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def cayley2euler(cayley: np.ndarray) -> np.ndarray:
     """Transforms Cayley vector to corresponding Euler vector
 
@@ -24,7 +24,7 @@ def cayley2euler(cayley: np.ndarray) -> np.ndarray:
     return 2 * np.arctan(0.5 * norm) / norm * cayley
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def cayley2euler_factor(cayley: np.ndarray) -> float:
     """Transforms Cayley vector to corresponding Euler vector
 
@@ -40,7 +40,7 @@ def cayley2euler_factor(cayley: np.ndarray) -> float:
     return 2 * np.arctan(0.5 * norm) / norm
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def euler2cayley(euler: np.ndarray) -> np.ndarray:
     """Transforms Euler vector to corresponding Cayley vector
 
@@ -56,7 +56,7 @@ def euler2cayley(euler: np.ndarray) -> np.ndarray:
     return 2 * np.tan(0.5 * norm) / norm * euler
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def euler2cayley_factor(euler: np.ndarray) -> float:
     """Transforms Euler vector to corresponding Cayley vector
 
@@ -77,7 +77,7 @@ def euler2cayley_factor(euler: np.ndarray) -> float:
 ##########################################################################################################
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def cayley2euler_linearexpansion(cayley_gs: np.ndarray) -> np.ndarray:
     """Linearization of the transformation from Cayley to Euler vector around a given groundstate vector
 
@@ -104,7 +104,7 @@ def cayley2euler_linearexpansion(cayley_gs: np.ndarray) -> np.ndarray:
     # return mat
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def euler2cayley_linearexpansion(euler_gs: np.ndarray) -> np.ndarray:
     """Linearization of the transformation from Euler to Cayley vector around a given groundstate vector
 
@@ -136,7 +136,7 @@ def euler2cayley_linearexpansion(euler_gs: np.ndarray) -> np.ndarray:
 ##########################################################################################################
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def splittransform_group2algebra(Theta_0: np.ndarray) -> np.ndarray:
     """
     Linear transformation that maps dynamic component in group splitting representation
@@ -180,7 +180,7 @@ def splittransform_group2algebra(Theta_0: np.ndarray) -> np.ndarray:
     return T
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def splittransform_algebra2group(Theta_0: np.ndarray) -> np.ndarray:
     """
     Linear transformation that maps dynamic component in lie algebra splitting representation R = exp(hat(Theta_0) + hat(Delta')) to group splitting representation

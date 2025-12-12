@@ -14,7 +14,7 @@ DEF_S03M_CLOSE_TO_ONE = 0.999999999999
 DEF_S03M_CLOSE_TO_MINUS_ONE = -0.999999999999
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def euler2rotmat(Omega: np.ndarray) -> np.ndarray:
     """
     Returns the matrix version of the Euler-Rodrigues formula
@@ -56,7 +56,7 @@ def euler2rotmat(Omega: np.ndarray) -> np.ndarray:
     return R
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def phi2rotz(phi: float) -> np.ndarray:
     """
     rotation matrix for rotation over z-axis
@@ -72,7 +72,7 @@ def phi2rotz(phi: float) -> np.ndarray:
     return R
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def phi2rotx(phi: float) -> np.ndarray:
     """
     rotation matrix for rotation over x-axis
@@ -88,7 +88,7 @@ def phi2rotx(phi: float) -> np.ndarray:
     return R
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def phi2roty(phi: float) -> np.ndarray:
     """
     rotation matrix for rotation over y-axis
@@ -104,7 +104,7 @@ def phi2roty(phi: float) -> np.ndarray:
     return R
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def rotmat2euler(R: np.ndarray) -> np.ndarray:
     """
     Inversion of Euler Rodriguez Formula

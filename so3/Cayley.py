@@ -10,7 +10,7 @@ from .pyConDec.pycondec import cond_jit
 ##########################################################################################################
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def cayley2rotmat(cayley: np.ndarray) -> np.ndarray:
     """Transforms cayley vector to corresponding rotation matrix
 
@@ -26,7 +26,7 @@ def cayley2rotmat(cayley: np.ndarray) -> np.ndarray:
     )
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def rotmat2cayley(rotmat: np.ndarray) -> np.ndarray:
     """Transforms rotation matrix to corresponding Cayley vector
 

@@ -13,7 +13,7 @@ DEF_EULER_CLOSE_TO_MINUS_ONE = -0.999999999999
 ##########################################################################################################
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def euler2rotmat(Omega: np.ndarray) -> np.ndarray:
     """Returns the matrix version of the Euler-Rodrigues formula
 
@@ -54,7 +54,7 @@ def euler2rotmat(Omega: np.ndarray) -> np.ndarray:
     return R
 
 
-# @cond_jit
+# @cond_jit(nopython=True,cache=True)
 # def rotmat2euler(R: np.ndarray) -> np.ndarray:
 #     """Inversion of Euler Rodriguez Formula
 
@@ -78,7 +78,7 @@ def euler2rotmat(Omega: np.ndarray) -> np.ndarray:
 #     Theta = Th * 0.5 / np.sin(Th) * Theta
 #     return Theta
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def rotmat2euler(R: np.ndarray) -> np.ndarray:
     """Inversion of Euler Rodriguez Formula
 
@@ -118,13 +118,13 @@ def rotmat2euler(R: np.ndarray) -> np.ndarray:
 #########################################################################################################
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def sqrt_rot(R: np.ndarray) -> np.ndarray:
     """generates rotation matrix that corresponds to a rotation over the same axis, but over half the angle."""
     return euler2rotmat(0.5 * rotmat2euler(R))
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def midstep(triad1: np.ndarray, triad2: np.ndarray) -> np.ndarray:
     return triad1 @ sqrt_rot(triad1.T @ triad2)
 
@@ -134,7 +134,7 @@ def midstep(triad1: np.ndarray, triad2: np.ndarray) -> np.ndarray:
 ##########################################################################################################
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def se3_euler2rotmat(Omega: np.ndarray, rotation_first: bool = True) -> np.ndarray:
     # if Omega.shape != (6,):
     #     raise ValueError(f'Expected shape (6,) array, but encountered {Omega.shape}.')
@@ -151,7 +151,7 @@ def se3_euler2rotmat(Omega: np.ndarray, rotation_first: bool = True) -> np.ndarr
     return rotmat
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def se3_rotmat2euler(R: np.ndarray, rotation_first: bool = True) -> np.ndarray:
     # if R.shape != (4,4):
     #     raise ValueError(f'Expected shape (4,4) array, but encountered {R.shape}.')

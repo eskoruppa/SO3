@@ -10,7 +10,7 @@ from .generators import hat_map
 from .pyConDec.pycondec import cond_jit
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def se3_inverse(g: np.ndarray) -> np.ndarray:
     """Inverse of element of SE3"""
     inv = np.zeros(g.shape)
@@ -20,18 +20,18 @@ def se3_inverse(g: np.ndarray) -> np.ndarray:
     return inv
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def se3_triads2rotmat(tau1: np.ndarray, tau2: np.ndarray) -> np.ndarray:
     """find SE3 transformation matrix, g, that maps tau1 into tau2 with respect to the frame of tau1"""
     return se3_inverse(tau1) @ tau2
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def se3_triads2euler(tau1: np.ndarray, tau2: np.ndarray) -> np.ndarray:
     return se3_rotmat2euler(se3_triads2rotmat(tau1, tau2))
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def se3_midstep2triad(triad_euler: np.ndarray) -> np.ndarray:
     midstep_euler = np.copy(triad_euler)
     vrot = triad_euler[:3]
@@ -41,7 +41,7 @@ def se3_midstep2triad(triad_euler: np.ndarray) -> np.ndarray:
     return midstep_euler
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def se3_triad2midstep(midstep_euler: np.ndarray) -> np.ndarray:
     triad_euler = np.copy(midstep_euler)
     vrot = midstep_euler[:3]
@@ -51,7 +51,7 @@ def se3_triad2midstep(midstep_euler: np.ndarray) -> np.ndarray:
     return triad_euler
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def se3_triadxrotmat_midsteptrans(tau1: np.ndarray, g: np.ndarray) -> np.ndarray:
     """Multiplication of triad with rotation matrix g (in SE3) assuming that the translation of g is defined with respect to the midstep triad."""
     R = g[:3, :3]
@@ -62,7 +62,7 @@ def se3_triadxrotmat_midsteptrans(tau1: np.ndarray, g: np.ndarray) -> np.ndarray
     return tau2
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def se3_triads2rotmat_midsteptrans(tau1: np.ndarray, tau2: np.ndarray) -> np.ndarray:
     """find SE3 transformation matrix, g, that maps tau1 into tau2 with respect to the frame of tau1, assuming that the translation of g is defined with respect to the midstep triad."""
     T1 = tau1[:3, :3]
@@ -76,7 +76,7 @@ def se3_triads2rotmat_midsteptrans(tau1: np.ndarray, tau2: np.ndarray) -> np.nda
     return g
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def se3_transformation_triad2midstep(g: np.ndarray) -> np.ndarray:
     """transforms translation of transformation g (in SE3) from canonical definition to mid-step triad definition."""
     midg = np.copy(g)
@@ -84,7 +84,7 @@ def se3_transformation_triad2midstep(g: np.ndarray) -> np.ndarray:
     return midg
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def se3_transformation_midstep2triad(midg: np.ndarray) -> np.ndarray:
     """transforms translation of transformation g (in SE3) from mid-step triad definition to canonical definition."""
     g = np.copy(midg)
@@ -97,7 +97,7 @@ def se3_transformation_midstep2triad(midg: np.ndarray) -> np.ndarray:
 ##########################################################################################################
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def se3_algebra2group_lintrans(
     groundstate_algebra: np.ndarray, translation_as_midstep: bool = False
 ) -> np.ndarray:
@@ -117,7 +117,7 @@ def se3_algebra2group_lintrans(
     return Trans
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def se3_group2algebra_lintrans(
     groundstate_group: np.ndarray, translation_as_midstep: bool = False
 ) -> np.ndarray:
@@ -144,7 +144,7 @@ def se3_group2algebra_lintrans(
 ##########################################################################################################
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def se3_algebra2group_stiffmat(
     groundstate_algebra: np.ndarray,
     stiff_algebra: np.ndarray,
@@ -159,7 +159,7 @@ def se3_algebra2group_stiffmat(
     return stiff_group
 
 
-@cond_jit
+@cond_jit(nopython=True,cache=True)
 def se3_group2algebra_stiffmat(
     groundstate_group: np.ndarray,
     stiff_group: np.ndarray,
