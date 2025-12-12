@@ -45,7 +45,17 @@ from .SE3 import (
     se3_triadxrotmat_midsteptrans,
 )
 
-from .quaternions import mat2quat, quat2mat, quats2rotmats
+from .quaternions import (
+    quat2mat_numba,
+    quat2mat,
+    mat2quat_numba,
+    mat2quat,
+    quats2mats_numba,
+    quats2mats,
+    mats2quats_numba,
+    mats2quats,
+    quats2rotmats #depricated!
+)
 
 # legacy method
 from .SO3Methods import phi2rotx, phi2roty, phi2rotz
