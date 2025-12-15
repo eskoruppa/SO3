@@ -50,9 +50,7 @@ from .quaternions import (
     quat2mat,
     mat2quat_numba,
     mat2quat,
-    quats2mats_numba,
     quats2mats,
-    mats2quats_numba,
     mats2quats,
     quats2rotmats #depricated!
 )

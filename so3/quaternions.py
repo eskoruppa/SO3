@@ -235,24 +235,6 @@ def mat2quat_numba(mat):
     return q
 
 
-# ----------------------------------------------------------------------
-# Batch cores (Numba-compiled, directly callable)
-# ----------------------------------------------------------------------
-
-@cond_jit(nopython=True, cache=True)
-def quats2mats_numba(quats, mats_out):
-    N = quats.shape[0]
-    for n in range(N):
-        mats_out[n] = quat2mat_numba(quats[n])
-
-
-@cond_jit(nopython=True, cache=True)
-def mats2quats_numba(mats, quats_out):
-    N = mats.shape[0]
-    for n in range(N):
-        quats_out[n] = mat2quat_numba(mats[n])
-
-
 def quat2mat(quat) -> np.ndarray:
     q = np.asarray(quat, dtype=np.float64)
     if q.shape != (4,):
@@ -268,26 +250,33 @@ def mat2quat(mat) -> np.ndarray:
 
 
 def quats2mats(quats: np.ndarray) -> np.ndarray:
-    quats = np.asarray(quats, dtype=np.float64)
-    if quats.ndim != 2 or quats.shape[1] != 4:
-        raise ValueError("Input 'quats' must have shape (N, 4).")
+    if len(quats.shape) == 1:
+        return quat2mat_numba(quats)
 
-    N = quats.shape[0]
-    mats = np.empty((N, 3, 3), dtype=np.float64)
-    quats2mats_numba(quats, mats)
+    matshape = tuple(list(quats.shape)[:-1] + [3,3])
+    mats = np.zeros((matshape),dtype=np.float64)
+    if len(quats.shape) > 2:
+        for i in range(len(quats)):
+            mats[i] = quats2mats(quats[i])
+        return mats
+    for i in range(len(quats)):
+       mats[i] = quat2mat_numba(quats[i])
     return mats
 
 
 def mats2quats(mats: np.ndarray) -> np.ndarray:
-    mats = np.asarray(mats, dtype=np.float64)
-    if mats.ndim != 3 or mats.shape[1:] != (3, 3):
-        raise ValueError("Input 'mats' must have shape (N, 3, 3).")
+    if len(mats.shape) == 2:
+        return mat2quat_numba(mats)
 
-    N = mats.shape[0]
-    quats = np.empty((N, 4), dtype=np.float64)
-    mats2quats_numba(mats, quats)
+    quatshape = tuple(list(mats.shape)[:-2] + [4])
+    quats = np.zeros((quatshape),dtype=np.float64)
+    if len(mats.shape) > 3:
+        for i in range(len(mats)):
+            quats[i] = mats2quats(mats[i])
+        return quats
+    for i in range(len(mats)):
+       quats[i] = mat2quat_numba(mats[i])
     return quats
-
 
 
 if __name__ == '__main__':
@@ -295,8 +284,22 @@ if __name__ == '__main__':
     from .Euler import euler2rotmat
     import sys
     
-    Om = np.random.uniform(-np.pi,np.pi,3)
+    dims = (5,6)
     
+    quats = np.zeros(tuple(list(dims)+[4]))
+    for i in range(dims[0]):
+        for j in range(dims[1]):
+            Om = np.random.uniform(-np.pi,np.pi,3)
+            R = euler2rotmat(Om)
+            quats[i,j] = mat2quat(R)
+    
+    T = quats2mats(quats)
+    
+    qs = mats2quats(T)
+    
+    print(np.sum(qs-quats))
+    
+    Om = np.random.uniform(-np.pi,np.pi,3)
     R = euler2rotmat(Om)
     q = mat2quat(R)
     
