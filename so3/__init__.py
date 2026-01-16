@@ -23,6 +23,8 @@ from .Euler import (
     rotmat2euler,
     se3_euler2rotmat,
     se3_rotmat2euler,
+    se3_eulers2rotmats,
+    se3_rotmats2eulers,
     sqrt_rot,
 )
 from .extend_euler import extend_euler

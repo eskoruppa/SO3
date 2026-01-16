@@ -288,3 +288,75 @@ def se3_rotmat2euler(R: np.ndarray, rotation_first: bool = True) -> np.ndarray:
         return np.concatenate((vrot, vtrans))
     else:
         return np.concatenate((vtrans, vrot))
+    
+    
+def se3_eulers2rotmats(X: np.ndarray) -> np.ndarray:
+    """
+    Convert 6D SE(3) coordinates to SE(3) matrices via se3_euler2rotmat.
+
+    Accepts:
+      - a single coordinate vector: shape (6,)
+      - a batch: shape (..., 6)
+
+    Returns:
+      - a single SE(3) matrix for (6,) input
+      - a batch of SE(3) matrices for (..., 6) input, with shape (..., M, M)
+        where M is whatever se3_euler2rotmat returns (typically 4x4 or 3x4).
+    """
+    X = np.asarray(X)
+    
+    if X.ndim == 1:
+        if X.shape[0] != 6:
+            raise ValueError(f"Expected shape (6,), got {X.shape}.")
+        return se3_euler2rotmat(X)
+
+    if X.shape[-1] != 6:
+        raise ValueError(f"Expected last dimension to be 6, got {X.shape}.")
+
+    lead_shape = X.shape[:-1]
+    n = int(np.prod(lead_shape))
+    X_flat = X.reshape((n, 6))
+
+    try:
+        se3_flat = se3_euler2rotmat(X_flat)
+        se3_flat = np.asarray(se3_flat)
+        return se3_flat.reshape(lead_shape + se3_flat.shape[-2:])
+    except Exception:
+        first = np.asarray(se3_euler2rotmat(X_flat[0]))
+        out = np.empty((n,) + first.shape, dtype=first.dtype)
+        out[0] = first
+        for i in range(1, n):
+            out[i] = se3_euler2rotmat(X_flat[i])
+        return out.reshape(lead_shape + first.shape)
+
+    
+def se3_rotmats2eulers(se3: np.ndarray) -> np.ndarray:
+    """
+    Convert SE(3) matrices to 6D coordinates via se3_rotmat2euler.
+
+    Accepts:
+      - a single matrix: shape (M, M) (typically (4,4) or (3,4))
+      - a batch: shape (..., M, M)
+
+    Returns:
+      - shape (6,) for a single matrix
+      - shape (..., 6) for a batch
+    """
+    se3 = np.asarray(se3)
+
+    if se3.ndim == 2:
+        return se3_rotmat2euler(se3)
+
+    lead_shape = se3.shape[:-2]
+    n = int(np.prod(lead_shape))
+    se3_flat = se3.reshape((n,) + se3.shape[-2:])
+
+    try:
+        X_flat = se3_rotmat2euler(se3_flat)
+        X_flat = np.asarray(X_flat, dtype=np.float64)
+        return X_flat.reshape(lead_shape + (6,))
+    except Exception:
+        X_flat = np.empty((n, 6), dtype=np.float64)
+        for i in range(n):
+            X_flat[i] = se3_rotmat2euler(se3_flat[i])
+        return X_flat.reshape(lead_shape + (6,))
