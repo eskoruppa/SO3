@@ -27,7 +27,7 @@ DEF_AXIS_COMP_EPS = 1e-15          # avoid division by ~0 in pi-axis extraction
 # so(3) → SO(3)
 # =========================
 
-# @cond_jit(nopython=True, cache=True)
+@cond_jit(nopython=True, cache=True)
 def euler2rotmat(Omega: np.ndarray) -> np.ndarray:
     """
     Euler-Rodrigues / exponential map from so(3) to SO(3).
@@ -90,7 +90,7 @@ def euler2rotmat(Omega: np.ndarray) -> np.ndarray:
 # SO(3) → so(3)
 # =========================
 
-# @cond_jit(nopython=True, cache=True)
+@cond_jit(nopython=True, cache=True)
 def rotmat2euler(R: np.ndarray) -> np.ndarray:
     """
     Inverse of Euler Rodriguez Formula (log map SO(3)->so(3)),
