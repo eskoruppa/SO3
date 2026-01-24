@@ -57,5 +57,7 @@ from .quaternions import (
     quats2rotmats #depricated!
 )
 
+from .rotation_methods import rotmat_align_vector
+
 # legacy method
 from .SO3Methods import phi2rotx, phi2roty, phi2rotz
