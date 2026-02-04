@@ -7,6 +7,7 @@
 
 # ignore testdata directory
 **test*/
+** test*
 **test.*
 
 # ignore data directories
