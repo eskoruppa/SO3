@@ -2,6 +2,8 @@
 
 import numpy as np
 
+from .Euler import inverse_right_jacobian, right_jacobian
+
 from .generators import hat_map
 from .pyConDec.pycondec import cond_jit
 
@@ -36,7 +38,7 @@ def cayley2euler_factor(cayley: np.ndarray) -> float:
     """
     norm = np.linalg.norm(cayley)
     if np.abs(norm) < 1e-14:
-        return np.zeros(3)
+        return 0.0
     return 2 * np.arctan(0.5 * norm) / norm
 
 
@@ -68,7 +70,7 @@ def euler2cayley_factor(euler: np.ndarray) -> float:
     """
     norm = np.linalg.norm(euler)
     if np.abs(norm) < 1e-14:
-        return np.zeros(3)
+        return 0.0
     return 2 * np.tan(0.5 * norm) / norm
 
 
@@ -151,33 +153,35 @@ def splittransform_group2algebra(Theta_0: np.ndarray) -> np.ndarray:
     Returns:
         float: Linear transformation matrix T (3x3) that transforms Delta into Delta': T*Delta = Delta'
     """
-    htheta = hat_map(Theta_0)
-    hthetasq = np.dot(htheta, htheta)
+    return inverse_right_jacobian(Theta_0)
+    
+    # htheta = hat_map(Theta_0)
+    # hthetasq = np.dot(htheta, htheta)
 
-    accutheta = np.copy(htheta)
-    # zeroth order
-    T = np.eye(3)
-    # first order
-    T += 0.5 * accutheta
-    # second order
-    accutheta = np.dot(accutheta, htheta)
-    T += 1.0 / 12 * accutheta
-    # fourth order
-    accutheta = np.dot(accutheta, hthetasq)
-    T += -1.0 / 720 * accutheta
-    # sixth order
-    accutheta = np.dot(accutheta, hthetasq)
-    T += 1.0 / 30240 * accutheta
-    # eighth order
-    accutheta = np.dot(accutheta, hthetasq)
-    T += -1.0 / 1209600 * accutheta
-    # tenth order
-    accutheta = np.dot(accutheta, hthetasq)
-    T += 1.0 / 47900160 * accutheta
-    # twelth order
-    accutheta = np.dot(accutheta, hthetasq)
-    T += -691.0 / 1307674368000 * accutheta
-    return T
+    # accutheta = np.copy(htheta)
+    # # zeroth order
+    # T = np.eye(3)
+    # # first order
+    # T += 0.5 * accutheta
+    # # second order
+    # accutheta = np.dot(accutheta, htheta)
+    # T += 1.0 / 12 * accutheta
+    # # fourth order
+    # accutheta = np.dot(accutheta, hthetasq)
+    # T += -1.0 / 720 * accutheta
+    # # sixth order
+    # accutheta = np.dot(accutheta, hthetasq)
+    # T += 1.0 / 30240 * accutheta
+    # # eighth order
+    # accutheta = np.dot(accutheta, hthetasq)
+    # T += -1.0 / 1209600 * accutheta
+    # # tenth order
+    # accutheta = np.dot(accutheta, hthetasq)
+    # T += 1.0 / 47900160 * accutheta
+    # # twelth order
+    # accutheta = np.dot(accutheta, hthetasq)
+    # T += -691.0 / 1307674368000 * accutheta
+    # return T
 
 
 @cond_jit(nopython=True,cache=True)
@@ -195,4 +199,6 @@ def splittransform_algebra2group(Theta_0: np.ndarray) -> np.ndarray:
     Returns:
         float: Linear transformation matrix T' (3x3) that transforms Delta into Delta': T'*Delta' = Delta
     """
-    return np.linalg.inv(splittransform_group2algebra(Theta_0))
+    
+    return right_jacobian(Theta_0)
+    # return np.linalg.inv(splittransform_group2algebra(Theta_0))

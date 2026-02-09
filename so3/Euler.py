@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import math
 from .pyConDec.pycondec import cond_jit
-
+from .generators import hat_map
 
 ##########################################################################################################
 ############### SO3 Methods ##############################################################################
@@ -135,111 +135,6 @@ def rotmat2euler(R: np.ndarray) -> np.ndarray:
     return out
 
 
-
-# DEF_EULER_EPSILON = 1e-12
-# DEF_EULER_CLOSE_TO_ONE = 0.999999999999
-# DEF_EULER_CLOSE_TO_MINUS_ONE = -0.999999999999
-
-# @cond_jit(nopython=True,cache=True)
-# def euler2rotmat(Omega: np.ndarray) -> np.ndarray:
-#     """Returns the matrix version of the Euler-Rodrigues formula
-
-#     Args:
-#         Omega (np.ndarray): Euler vector / Rotation vector (3-vector)
-
-#     Returns:
-#         np.ndarray: Rotation matrix (element of SO(3))
-#     """
-#     Om = np.linalg.norm(Omega)
-#     R = np.zeros((3, 3), dtype=np.double)
-
-#     # if norm is zero, return identity matrix
-#     if Om < DEF_EULER_EPSILON:
-#         return np.eye(3)
-
-#     cosOm = np.cos(Om)
-#     sinOm = np.sin(Om)
-#     Omsq = Om * Om
-#     fac1 = (1 - cosOm) / Omsq
-#     fac2 = sinOm / Om
-
-#     R[0, 0] = cosOm + Omega[0] ** 2 * fac1
-#     R[1, 1] = cosOm + Omega[1] ** 2 * fac1
-#     R[2, 2] = cosOm + Omega[2] ** 2 * fac1
-#     A = Omega[0] * Omega[1] * fac1
-#     B = Omega[2] * fac2
-#     R[0, 1] = A - B
-#     R[1, 0] = A + B
-#     A = Omega[0] * Omega[2] * fac1
-#     B = Omega[1] * fac2
-#     R[0, 2] = A + B
-#     R[2, 0] = A - B
-#     A = Omega[1] * Omega[2] * fac1
-#     B = Omega[0] * fac2
-#     R[1, 2] = A - B
-#     R[2, 1] = A + B
-#     return R
-
-
-# # @cond_jit(nopython=True,cache=True)
-# # def rotmat2euler(R: np.ndarray) -> np.ndarray:
-# #     """Inversion of Euler Rodriguez Formula
-
-# #     Args:
-# #         R (np.ndarray): Rotation matrix (element of SO(3))
-
-# #     Returns:
-# #         np.ndarray: Euler vector / Rotation vector (3-vector)
-# #     """
-# #     val = 0.5 * (np.trace(R) - 1)
-# #     if val > DEF_EULER_CLOSE_TO_ONE:
-# #         return np.zeros(3)
-# #     if val < DEF_EULER_CLOSE_TO_MINUS_ONE:
-# #         if R[0, 0] > DEF_EULER_CLOSE_TO_ONE:
-# #             return np.array([np.pi, 0, 0])
-# #         if R[1, 1] > DEF_EULER_CLOSE_TO_ONE:
-# #             return np.array([0, np.pi, 0])
-# #         return np.array([0, 0, np.pi])
-# #     Th = np.arccos(val)
-# #     Theta = np.array([(R[2, 1] - R[1, 2]), (R[0, 2] - R[2, 0]), (R[1, 0] - R[0, 1])])
-# #     Theta = Th * 0.5 / np.sin(Th) * Theta
-# #     return Theta
-
-# @cond_jit(nopython=True,cache=True)
-# def rotmat2euler(R: np.ndarray) -> np.ndarray:
-#     """Inversion of Euler Rodriguez Formula
-
-#     Args:
-#         R (np.ndarray): Rotation matrix (element of SO(3))
-
-#     Returns:
-#         np.ndarray: Euler vector / Rotation vector (3-vector)
-#     """
-#     val = 0.5 * (np.trace(R) - 1)
-#     if val > DEF_EULER_CLOSE_TO_ONE:
-#         return np.zeros(3)
-#     if val < DEF_EULER_CLOSE_TO_MINUS_ONE:
-#         # rotation around first axis by angle pi
-#         if R[0, 0] > DEF_EULER_CLOSE_TO_ONE:
-#             return np.array([np.pi, 0, 0])
-#         # rotation around second axis by angle pi
-#         if R[1, 1] > DEF_EULER_CLOSE_TO_ONE:
-#             return np.array([0, np.pi, 0])
-#         # rotation around third axis by angle pi
-#         if R[2, 2] > DEF_EULER_CLOSE_TO_ONE:
-#             return np.array([0, 0, np.pi])
-#         # rotation around arbitrary axis by angle pi
-#         A = R - np.eye(3)       
-#         b = np.cross(A[0],A[1])
-#         th = b - np.dot(b,A[2])*A[2]
-#         th = th / np.linalg.norm(th) * np.pi
-#         return th
-#     Th = np.arccos(val)
-#     Theta = np.array([(R[2, 1] - R[1, 2]), (R[0, 2] - R[2, 0]), (R[1, 0] - R[0, 1])])
-#     Theta = Th * 0.5 / np.sin(Th) * Theta
-#     return Theta
-
-
 #########################################################################################################
 ############## sqrt of rotation matrix ##################################################################
 #########################################################################################################
@@ -254,6 +149,146 @@ def sqrt_rot(R: np.ndarray) -> np.ndarray:
 @cond_jit(nopython=True,cache=True)
 def midstep(triad1: np.ndarray, triad2: np.ndarray) -> np.ndarray:
     return triad1 @ sqrt_rot(triad1.T @ triad2)
+
+
+##########################################################################################################
+############### Left- and Right-Jacobians ################################################################
+##########################################################################################################
+
+@cond_jit(nopython=True,cache=True)
+def right_jacobian(Omega: np.ndarray) -> np.ndarray:
+    """Compute the right Jacobian of SO(3) exponential map.
+
+    The right Jacobian encodes how small perturbations in the Lie algebra
+    map to perturbations in the group via the exponential map:
+        exp(Omega + δΩ) ≈ exp(Omega) exp(hat[JR(Omega) δΩ])
+
+    For small Ω use Taylor expansion (not zeroth order).
+
+    Parameters
+    ----------
+    Omega : ndarray, shape (3,)
+        Rotation vector (axis-angle, radians).
+
+    Returns
+    -------
+    JR : ndarray, shape (3, 3)
+        Right Jacobian matrix.
+
+    References
+    ----------
+    Equation (A14) in NucFreeEnergy.pdf:
+        JR(Ω) = 1 - (1-cos Ω)/Ω² * Ω̂ + (Ω - sin Ω)/Ω³ * Ω̂²
+    """
+    Om = np.linalg.norm(Omega)
+    Omega_hat = hat_map(Omega)
+    Omega_hat_sq = Omega_hat @ Omega_hat
+
+    if Om < 1e-6:
+        # Small-angle expansion: JR(Ω) ≈ I - (1/2)Ω̂ + (1/6)Ω̂²
+        return np.eye(3) - 0.5 * Omega_hat + (1.0 / 6.0) * Omega_hat_sq
+
+    Om2 = Om * Om
+    Om3 = Om2 * Om
+
+    c1 = (1.0 - np.cos(Om)) / Om2
+    c2 = (Om - np.sin(Om)) / Om3
+
+    return np.eye(3) - c1 * Omega_hat + c2 * Omega_hat_sq
+
+
+@cond_jit(nopython=True,cache=True)
+def left_jacobian(Omega: np.ndarray) -> np.ndarray:
+    """Compute the left Jacobian of SO(3) exponential map.
+
+    The left Jacobian encodes how small perturbations in the Lie algebra
+    map to perturbations in the group via the exponential map:
+        exp(Omega + δΩ) ≈ exp(hat[JL(Omega) δΩ]) exp(Omega)
+
+    For small Ω use Taylor expansion (not zeroth order).
+
+    Parameters
+    ----------
+    Omega : ndarray, shape (3,)
+        Rotation vector (axis-angle, radians).
+
+    Returns
+    -------
+    JL : ndarray, shape (3, 3)
+        Left Jacobian matrix.
+
+    References
+    ----------
+    Equation (A15) in NucFreeEnergy.pdf:
+        JL(Ω) = JR(-Ω) = JR^T(Ω) = R(Ω) JR(Ω)
+    where R(Ω) = exp(Ω̂) is the rotation matrix.
+    """
+    # Use the relation: JL(Ω) = JR^T(Ω)
+    return right_jacobian(Omega).T
+
+
+@cond_jit(nopython=True,cache=True)
+def inverse_right_jacobian(Omega: np.ndarray) -> np.ndarray:
+    """Compute the inverse of the right Jacobian.
+
+    Parameters
+    ----------
+    Omega : ndarray, shape (3,)
+        Rotation vector (axis-angle, radians).
+
+    Returns
+    -------
+    JR_inv : ndarray, shape (3, 3)
+        Inverse of the right Jacobian matrix.
+
+    Notes
+    -----
+    For small Ω, the inverse is computed via Taylor expansion:
+        JR_inv(Ω) ≈ I + (1/2)Ω̂ + (1/12)Ω̂²
+
+    For general angles, the exact formula is:
+        JR_inv(Ω) = I + (1/2)Ω̂ + b(Ω) * Ω̂²
+    where b(Ω) = (c₁/2 - c₂)/(1 - c₂||Ω||²),
+          c₁ = (1-cos||Ω||)/||Ω||²,
+          c₂ = (||Ω|| - sin||Ω||)/||Ω||³
+    """
+    Om = np.linalg.norm(Omega)
+    Omega_hat = hat_map(Omega)
+    Omega_hat_sq = Omega_hat @ Omega_hat
+
+    if Om < 1e-6:
+        # Small-angle expansion: JR_inv(Ω) ≈ I + (1/2)Ω̂ + (1/12)Ω̂²
+        return np.eye(3) + 0.5 * Omega_hat + (1.0 / 12.0) * Omega_hat_sq
+
+    Om2 = Om * Om
+    c1 = (1.0 - np.cos(Om)) / Om2
+    c2 = (Om - np.sin(Om)) / (Om2 * Om)
+    
+    # Coefficient for Ω̂² term
+    b = (c1 / 2.0 - c2) / (1.0 - c2 * Om2)
+
+    return np.eye(3) + 0.5 * Omega_hat + b * Omega_hat_sq
+
+
+@cond_jit(nopython=True,cache=True)
+def inverse_left_jacobian(Omega: np.ndarray) -> np.ndarray:
+    """Compute the inverse of the left Jacobian.
+
+    Parameters
+    ----------
+    Omega : ndarray, shape (3,)
+        Rotation vector (axis-angle, radians).
+
+    Returns
+    -------
+    JL_inv : ndarray, shape (3, 3)
+        Inverse of the left Jacobian matrix.
+
+    Notes
+    -----
+    Uses the relation: JL_inv(Ω) = (JR_inv(Ω))^T
+    """
+    return inverse_right_jacobian(Omega).T
 
 
 ##########################################################################################################

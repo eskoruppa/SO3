@@ -26,6 +26,10 @@ from .Euler import (
     se3_eulers2rotmats,
     se3_rotmats2eulers,
     sqrt_rot,
+    right_jacobian,
+    left_jacobian,
+    inverse_right_jacobian,
+    inverse_left_jacobian,
 )
 from .extend_euler import extend_euler
 from .generators import generator1, generator2, generator3, hat_map, vec_map
