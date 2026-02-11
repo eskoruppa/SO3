@@ -13,7 +13,7 @@ from .pyConDec.pycondec import cond_jit
 @cond_jit(nopython=True,cache=True)
 def se3_inverse(g: np.ndarray) -> np.ndarray:
     """Inverse of element of SE3"""
-    inv = np.zeros(g.shape)
+    inv = np.empty(g.shape, dtype=g.dtype)
     inv[:3, :3] = g[:3, :3].T
     inv[:3, 3] = -inv[:3, :3] @ g[:3, 3]
     inv[3, 3] = 1
