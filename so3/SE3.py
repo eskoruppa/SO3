@@ -16,7 +16,7 @@ def se3_inverse(g: np.ndarray) -> np.ndarray:
     inv = np.empty(g.shape, dtype=g.dtype)
     inv[:3, :3] = g[:3, :3].T
     inv[:3, 3] = -inv[:3, :3] @ g[:3, 3]
-    inv[3, 3] = 1
+    inv[3, :]  = np.array([0, 0, 0, 1])
     return inv
 
 
