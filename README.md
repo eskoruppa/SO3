@@ -10,13 +10,14 @@ The library supports multiple parameterizations of rotations — Euler (rotation
 
 ### From source
 
-Clone the repository and install, then install pyConDec separately:
+Clone the repository and install, then install pyConDec from source:
 
 ```bash
 git clone https://github.com/eskoruppa/SO3.git
 cd SO3
 pip install .
-pip install pyConDec
+git clone https://github.com/eskoruppa/pyConDec.git
+cd pyConDec && pip install . && cd ..
 ```
 
 To also enable optional Numba JIT acceleration:
@@ -25,11 +26,12 @@ To also enable optional Numba JIT acceleration:
 pip install numba
 ```
 
-Or install all optional dependencies at once:
+Or install SO3 with all optional dependencies at once:
 
 ```bash
 pip install ".[all]"
-pip install pyConDec
+git clone https://github.com/eskoruppa/pyConDec.git
+cd pyConDec && pip install . && cd ..
 ```
 
 ### Dependencies
@@ -42,15 +44,7 @@ pip install pyConDec
 
 ### Installing pyConDec
 
-pyConDec manages conditional Numba JIT decoration and must be installed alongside SO3.
-
-**From PyPI (once published)**
-
-```bash
-pip install pyConDec
-```
-
-**From source**
+pyConDec manages conditional Numba JIT decoration and must be installed alongside SO3. Clone and install it from source:
 
 ```bash
 git clone https://github.com/eskoruppa/pyConDec.git
