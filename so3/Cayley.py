@@ -3,7 +3,7 @@
 import numpy as np
 
 from .generators import hat_map, vec_map  # , generator1, generator2, generator3
-from .pyConDec.pycondec import cond_jit
+from ._pycondec import cond_jit
 
 ##########################################################################################################
 ############### SO3 Methods ##############################################################################

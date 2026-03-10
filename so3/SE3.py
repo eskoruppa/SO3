@@ -7,7 +7,7 @@ import numpy as np
 from .conversions import splittransform_algebra2group, splittransform_group2algebra
 from .Euler import euler2rotmat, rotmat2euler, se3_rotmat2euler, sqrt_rot
 from .generators import hat_map
-from .pyConDec.pycondec import cond_jit
+from ._pycondec import cond_jit
 
 
 @cond_jit(nopython=True,cache=True)

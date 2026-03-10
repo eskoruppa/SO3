@@ -10,18 +10,26 @@ The library supports multiple parameterizations of rotations — Euler (rotation
 
 ### From source
 
-Clone the repository **including its submodules** (pyConDec is embedded as a git submodule):
+Clone the repository and install, then install pyConDec separately:
 
 ```bash
-git clone --recurse-submodules -j8 https://github.com/eskoruppa/SO3.git
+git clone https://github.com/eskoruppa/SO3.git
 cd SO3
 pip install .
+pip install pyConDec
 ```
 
-If you already cloned the repository without `--recurse-submodules`, initialise the submodule first:
+To also enable optional Numba JIT acceleration:
 
 ```bash
-git submodule update --init --recursive
+pip install numba
+```
+
+Or install all optional dependencies at once:
+
+```bash
+pip install ".[all]"
+pip install pyConDec
 ```
 
 ### Dependencies
@@ -29,18 +37,12 @@ git submodule update --init --recursive
 | Dependency | Required | Notes |
 |------------|----------|-------|
 | `numpy` | **Yes** | Installed automatically by pip |
+| `pyConDec` | **Yes** | Conditional-decorator utility; install separately (see above) |
 | `numba` | No | Enables JIT acceleration of all hot-path functions |
-| `pyConDec` | Bundled | Included as a git submodule; also available as a standalone package |
 
-To enable Numba acceleration, install it separately:
+### Installing pyConDec
 
-```bash
-pip install numba
-```
-
-### pyConDec — standalone installation
-
-pyConDec is the conditional-decorator utility used internally by SO3 to apply Numba JIT only when Numba is available. It can also be installed independently.
+pyConDec manages conditional Numba JIT decoration and must be installed alongside SO3.
 
 **From PyPI (once published)**
 
@@ -56,11 +58,17 @@ cd pyConDec
 pip install .
 ```
 
-To also install the optional Numba dependency:
+### Alternative: recursive clone (submodule workflow)
+
+If you prefer to keep pyConDec as a bundled git submodule — for example when working on SO3 itself or in environments without internet access — clone with `--recurse-submodules` instead:
 
 ```bash
-pip install numba
+git clone --recurse-submodules -j8 https://github.com/eskoruppa/SO3.git
+cd SO3
+pip install .
 ```
+
+In this case pyConDec does **not** need to be installed separately; the submodule in `so3/pyConDec/` takes priority automatically.
 
 ---
 

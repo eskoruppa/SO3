@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 import math
-from .pyConDec.pycondec import cond_jit
+from ._pycondec import cond_jit
 from .generators import hat_map
 
 ##########################################################################################################

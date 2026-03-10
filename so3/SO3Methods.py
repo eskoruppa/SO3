@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from .pyConDec.pycondec import cond_jit
+from ._pycondec import cond_jit
 
 """
 This is a legacy module and will be phased out in the near future

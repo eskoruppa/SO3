@@ -2,7 +2,7 @@
 
 from typing import List
 import numpy as np
-from .pyConDec.pycondec import cond_jit
+from ._pycondec import cond_jit
 
 @cond_jit(nopython=True,cache=True)
 def dots(mats: List[np.ndarray]) -> np.ndarray:

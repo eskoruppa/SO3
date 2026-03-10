@@ -1,5 +1,5 @@
 import numpy as np
-from .pyConDec.pycondec import cond_jit
+from ._pycondec import cond_jit
 import warnings
 
 def depdec(repl=None):

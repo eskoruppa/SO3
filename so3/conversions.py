@@ -5,7 +5,7 @@ import numpy as np
 from .Euler import inverse_right_jacobian, right_jacobian
 
 from .generators import hat_map
-from .pyConDec.pycondec import cond_jit
+from ._pycondec import cond_jit
 
 # from .generators import hat_map, vec_map, generator1, generator2, generator3
 
@@ -95,16 +95,6 @@ def cayley2euler_linearexpansion(cayley_gs: np.ndarray) -> np.ndarray:
     fac = (4.0 / (4 + cayley_norm_sq) - ratio_euler_cayley) / cayley_norm_sq
     return np.eye(3) * ratio_euler_cayley + np.outer(cayley_gs, cayley_gs) * fac
 
-    # cnorm = np.linalg.norm(cayley_gs)
-    # csq = cnorm**2
-    # fac = 2./csq*(2./(4+csq) - np.arctan(cnorm/2)/cnorm)
-    # mat = np.zeros((3,3))
-    # for i in range(3):
-    #     for j in range(3):
-    #         mat[i,j] = fac * cayley_gs[i] * cayley_gs[j]
-    #     mat[i,i] += 2*np.arctan(0.5*cnorm)/cnorm
-    # return mat
-
 
 @cond_jit(nopython=True,cache=True)
 def euler2cayley_linearexpansion(euler_gs: np.ndarray) -> np.ndarray:
@@ -121,16 +111,6 @@ def euler2cayley_linearexpansion(euler_gs: np.ndarray) -> np.ndarray:
     ratio_cayley_euler = 2 * np.tan(0.5 * euler_norm) / euler_norm
     fac = (1.0 / (np.cos(0.5 * euler_norm)) ** 2 - ratio_cayley_euler) / euler_norm_sq
     return np.eye(3) * ratio_cayley_euler + np.outer(euler_gs, euler_gs) * fac
-
-    # enorm = np.linalg.norm(euler_gs)
-    # esq = enorm**2
-    # fac = 1./esq*( 1./np.cos(0.5*enorm) - 2*np.tan(0.5*enorm)/enorm )
-    # mat = np.zeros((3,3))
-    # for i in range(3):
-    #     for j in range(3):
-    #         mat[i,j] = fac * euler_gs[i] * euler_gs[j]
-    #     mat[i,i] += 2*np.tan(0.5*enorm)/enorm
-    # return mat
 
 
 ##########################################################################################################

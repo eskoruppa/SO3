@@ -34,7 +34,7 @@ from .Euler import (
 from .extend_euler import extend_euler
 from .generators import generator1, generator2, generator3, hat_map, vec_map
 from .matrices import dots
-from .pyConDec.pycondec import cond_jit
+from ._pycondec import cond_jit
 from .SE3 import (
     se3_algebra2group_lintrans,
     se3_algebra2group_stiffmat,

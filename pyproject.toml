@@ -9,7 +9,7 @@ description = "A collection of methods for the rotation group SO(3) and SE(3)"
 readme = "README.md"
 license = { text = "GPL-2.0" }
 authors = [
-    { name = "Enrico Skoruppa", email = "enrico.skoruppa@gmail.com" },
+    { name = "Enrico Skoruppa", email = "esk.phys@gmail.com" },
 ]
 requires-python = ">=3.8"
 dependencies = [
@@ -17,7 +17,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-numba = ["numba"]
+numba    = ["numba"]
+pycondec = ["pyConDec"]
+all      = ["numba", "pyConDec"]
 
 [project.urls]
 Homepage = "https://github.com/eskoruppa/SO3"
