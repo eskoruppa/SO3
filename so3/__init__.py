@@ -181,14 +181,54 @@ from .quaternions import (
 
 from .rotation_methods import rotmat_align_vector
 
-# from .transforms.transform_cayley2euler import (
-#     se3_euler2cayley,
-#     se3_cayley2euler,
-#     se3_cayley2euler_lintrans,
-#     se3_euler2cayley_lintrans,
-#     se3_cayley2euler_stiffmat,
-#     se3_euler2cayley_stiffmat,
-# )
+
+from .transforms.transform_algebra2group import (
+    algebra2group_lintrans,
+    group2algebra_lintrans,
+    algebra2group_stiffmat,
+    group2algebra_stiffmat,
+)
+
+from .transforms.transform_cayley2euler import (
+    se3_euler2cayley,
+    se3_cayley2euler,
+    se3_cayley2euler_lintrans,
+    se3_euler2cayley_lintrans,
+    se3_cayley2euler_stiffmat,
+    se3_euler2cayley_stiffmat,
+)
+
+from .transforms.transform_midstep2triad import (
+    midstep2triad,
+    triad2midstep,
+    midstep2triad_lintrans,
+    triad2midstep_lintrans,
+    midstep2triad_stiffmat,
+    triad2midstep_stiffmat,
+)
+
+from .transforms.transform_marginals import (
+    matrix_marginal,
+    vector_marginal,
+    matrix_marginal_assignment,
+    vector_marginal_assignment,
+    unwrap_wildtypes,
+    matrix_blockmarginal,
+    vector_blockmarginal,
+    matrix_rotmarginal,
+    matrix_transmarginal,
+    vector_rotmarginal,
+    vector_transmarginal,
+    marginal_schur_complement,
+)
+
+from .transforms.transform_statevec import (
+    statevec2vecs,
+    vecs2statevec,
+)
+
+from .transforms.transform_units import array_conversion
+
 
 # legacy method
 from .SO3Methods import phi2rotx, phi2roty, phi2rotz
