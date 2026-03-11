@@ -1,7 +1,7 @@
 #!/bin/env python3
 
 import numpy as np
-from .Euler import euler2rotmat
+from .Euler import _euler2rotmat_sv as euler2rotmat
 from ._pycondec import cond_jit
 
 

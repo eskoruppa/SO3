@@ -168,11 +168,11 @@ def rotmat_align_vector(vec_from: np.ndarray, vec_to: np.ndarray) -> np.ndarray:
             perp = np.cross(vec_from, np.array([0.0, 1.0, 0.0]))
         perp = perp / np.linalg.norm(perp)
         Theta = np.pi * perp
-        return so3.euler2rotmat(Theta)
+        return euler2rotmat(Theta)
     
     # General case
     n = np.cross(vec_from, vec_to)
     n = n / np.linalg.norm(n)
     angle = np.arccos(np.clip(dot, -1.0, 1.0))
     Theta = angle * n
-    return so3.euler2rotmat(Theta)  
+    return euler2rotmat(Theta)  
