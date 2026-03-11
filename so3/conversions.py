@@ -11,19 +11,39 @@ from ._pycondec import cond_jit
 
 
 @cond_jit(nopython=True,cache=True)
-def cayley2euler(cayley: np.ndarray) -> np.ndarray:
-    """Transforms Cayley vector to corresponding Euler vector
-
-    Args:
-        cayley (np.ndarray): Cayley vector (3-vector)
-
-    Returns:
-        np.ndarray: Euler vector (3-vector)
-    """
+def _cayley2euler_single(cayley: np.ndarray) -> np.ndarray:
     norm = np.linalg.norm(cayley)
     if np.abs(norm) < 1e-14:
         return np.zeros(3)
     return 2 * np.arctan(0.5 * norm) / norm * cayley
+
+
+@cond_jit(nopython=True,cache=True)
+def _cayley2euler_batch(cayley: np.ndarray) -> np.ndarray:
+    result = np.zeros_like(cayley)
+    for i in range(cayley.shape[0]):
+        norm = np.linalg.norm(cayley[i])
+        if np.abs(norm) >= 1e-14:
+            fac = 2.0 * np.arctan(0.5 * norm) / norm
+            result[i, 0] = fac * cayley[i, 0]
+            result[i, 1] = fac * cayley[i, 1]
+            result[i, 2] = fac * cayley[i, 2]
+    return result
+
+
+@cond_jit(nopython=True,cache=True)
+def cayley2euler(cayley: np.ndarray) -> np.ndarray:
+    """Transforms Cayley vector(s) to corresponding Euler vector(s).
+
+    Args:
+        cayley (np.ndarray): Cayley vector (3-vector) or array of Cayley vectors (Nx3)
+
+    Returns:
+        np.ndarray: Euler vector (3-vector) or array of Euler vectors (Nx3)
+    """
+    if cayley.ndim == 1:
+        return _cayley2euler_single(cayley)
+    return _cayley2euler_batch(cayley)
 
 
 @cond_jit(nopython=True,cache=True)
@@ -43,19 +63,39 @@ def cayley2euler_factor(cayley: np.ndarray) -> float:
 
 
 @cond_jit(nopython=True,cache=True)
-def euler2cayley(euler: np.ndarray) -> np.ndarray:
-    """Transforms Euler vector to corresponding Cayley vector
-
-    Args:
-        euler (np.ndarray): Euler vector (3-vector)
-
-    Returns:
-        np.ndarray: Cayley vector (3-vector)
-    """
+def _euler2cayley_single(euler: np.ndarray) -> np.ndarray:
     norm = np.linalg.norm(euler)
     if np.abs(norm) < 1e-14:
         return np.zeros(3)
     return 2 * np.tan(0.5 * norm) / norm * euler
+
+
+@cond_jit(nopython=True,cache=True)
+def _euler2cayley_batch(euler: np.ndarray) -> np.ndarray:
+    result = np.zeros_like(euler)
+    for i in range(euler.shape[0]):
+        norm = np.linalg.norm(euler[i])
+        if np.abs(norm) >= 1e-14:
+            fac = 2.0 * np.tan(0.5 * norm) / norm
+            result[i, 0] = fac * euler[i, 0]
+            result[i, 1] = fac * euler[i, 1]
+            result[i, 2] = fac * euler[i, 2]
+    return result
+
+
+@cond_jit(nopython=True,cache=True)
+def euler2cayley(euler: np.ndarray) -> np.ndarray:
+    """Transforms Euler vector(s) to corresponding Cayley vector(s).
+
+    Args:
+        euler (np.ndarray): Euler vector (3-vector) or array of Euler vectors (Nx3)
+
+    Returns:
+        np.ndarray: Cayley vector (3-vector) or array of Cayley vectors (Nx3)
+    """
+    if euler.ndim == 1:
+        return _euler2cayley_single(euler)
+    return _euler2cayley_batch(euler)
 
 
 @cond_jit(nopython=True,cache=True)
