@@ -169,6 +169,9 @@ from .SE3 import (
     se3_group2algebra_stiffmat_single,
 )
 
+# from .se3_junction_methods import (
+
+
 from .quaternions import (
     quat2mat_numba,
     quat2mat,
@@ -184,9 +187,11 @@ from .rotation_methods import rotmat_align_vector
 
 from .transforms.transform_algebra2group import (
     algebra2group_lintrans,
-    group2algebra_lintrans,
+    algebra2group_params,
     algebra2group_stiffmat,
+    group2algebra_lintrans,
     group2algebra_stiffmat,
+    group2algebra_params,
 )
 
 from .transforms.transform_cayley2euler import (
