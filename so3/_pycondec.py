@@ -9,11 +9,30 @@ Priority:
 Raises ImportError with a helpful message if neither is available.
 """
 
+import sys
+import pathlib
+
+_PYCONDEC_SUBMODULE = pathlib.Path(__file__).parent / "pyConDec"
+
+
+def _ensure_pycondec() -> None:
+    """Insert the submodule root into sys.path so that ``import pycondec``
+    resolves to the local checkout. Does nothing if already importable or
+    if the submodule is not present."""
+    submodule_root = str(_PYCONDEC_SUBMODULE)
+    if submodule_root not in sys.path:
+        sys.path.insert(0, submodule_root)
+
+
 try:
-    from .pyConDec.pycondec import cond_jit, cond_jitclass
+    # 1. Local submodule: so3/pyConDec/pycondec  (dev / recursive-clone workflow)
+    if (_PYCONDEC_SUBMODULE / "pycondec").is_dir():
+        _ensure_pycondec()
+    from pycondec import cond_jit, cond_jitclass  # noqa: E402
 except (ImportError, ModuleNotFoundError):
     try:
-        from pycondec import cond_jit, cond_jitclass
+        # 2. Installed package
+        from pycondec import cond_jit, cond_jitclass  # noqa: F811
     except (ImportError, ModuleNotFoundError) as e:
         raise ImportError(
             "pyConDec could not be found. Either:\n"

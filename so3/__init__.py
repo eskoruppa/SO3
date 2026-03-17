@@ -169,8 +169,24 @@ from .SE3 import (
     se3_group2algebra_stiffmat_single,
 )
 
-# from .se3_junction_methods import (
-
+from .se3_junction_methods import (
+    X2g,
+    g2X,
+    X2glh,
+    X2grh,
+    glh2X,
+    grh2X,
+    g2glh,
+    g2grh,
+    glh2g,
+    grh2g,
+    X2g_inv,
+    X2glh_inv,
+    X2grh_inv,
+    A_rev,
+    A_lh,
+    A_rh,
+)
 
 from .quaternions import (
     quat2mat_numba,
