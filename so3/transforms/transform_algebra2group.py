@@ -193,9 +193,7 @@ def algebra2group_lintrans(
                 definition assuming that the splitting between static and dynamic compoent occures at 
                 the level of the group (SE3): g=s*d. If a list is provided it must have N elements 
                 (one per groundstate entry); a single bool is broadcast to all N entries.
-                    / R   v \   / S   s \  / D   d \     / SD  Sd+s \
-                g =           =                       = 
-                    \ 0   1 /   \ 0   1 /  \ 0   1 /     \ 0     1  /
+                g = sd
                 
     Returns:
         float: Linear transformation matrix that transforms small deviations around the given groundstate
