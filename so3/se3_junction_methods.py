@@ -198,6 +198,38 @@ def grh2g(grh: np.ndarray) -> np.ndarray:
     return X2g(grh2X(grh))
 
 @cond_jit(nopython=True,cache=True)
+def g2glh_inv(g: np.ndarray) -> np.ndarray:
+    """Compute left-midpoint `glh` directly from homogeneous matrix `g`.
+
+    This is a thin wrapper: `g2glh(g) == X2glh(g2X(g))`.
+    """
+    return X2glh_inv(g2X(g))
+
+@cond_jit(nopython=True,cache=True)
+def g2grh_inv(g: np.ndarray) -> np.ndarray:
+    """Compute right-midpoint `grh` directly from homogeneous matrix `g`.
+
+    This is a thin wrapper: `g2grh(g) == X2grh(g2X(g))`.
+    """
+    return X2grh_inv(g2X(g))
+
+@cond_jit(nopython=True,cache=True)
+def glh2g_inv(glh: np.ndarray) -> np.ndarray:
+    """Reconstruct full homogeneous matrix `g` from left-midpoint `glh`.
+
+    This is a thin wrapper around `X2g(glh2X(glh))`.
+    """
+    return X2g_inv(glh2X(glh))
+
+@cond_jit(nopython=True,cache=True)
+def grh2g_inv(grh: np.ndarray) -> np.ndarray:
+    """Reconstruct full homogeneous matrix `g` from right-midpoint `grh`.
+
+    This is a thin wrapper around `X2g(grh2X(grh))`.
+    """
+    return X2g_inv(grh2X(grh))
+
+@cond_jit(nopython=True,cache=True)
 def X2g_inv(X: np.ndarray) -> np.ndarray:
     g = np.zeros((4, 4), dtype=np.float64)
     R = euler2rotmat(X[:3])
