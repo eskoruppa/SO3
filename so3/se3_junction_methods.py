@@ -20,6 +20,25 @@ from .Euler import _right_jacobian_sv as right_jacobian
 from .Euler import _inverse_right_jacobian_sv as inverse_right_jacobian
 from .generators import _hat_map_sv as hat_map
 
+@cond_jit(nopython=True,cache=True)
+def X_inv(X: np.ndarray) -> np.ndarray:
+    """Compute the inverse of a 6D SE(3) coordinate vector.
+
+    Parameters
+    ----------
+    X : ndarray, shape (6,)
+        SE(3) coordinate vector `[omega, v]`.
+
+    Returns
+    -------
+    X_inv : ndarray, shape (6,)
+        Inverse SE(3) coordinate vector corresponding to `X`.
+    """
+    Xinv = np.zeros((6,), dtype=np.float64)
+    Rinv = euler2rotmat(-X[:3])
+    Xinv[:3] = -X[:3]
+    Xinv[3:] = -Rinv @ X[3:]
+    return Xinv
 
 @cond_jit(nopython=True,cache=True)
 def X2g(X: np.ndarray) -> np.ndarray:
