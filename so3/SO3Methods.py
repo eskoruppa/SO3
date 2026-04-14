@@ -110,8 +110,10 @@ def rotmat2euler(R: np.ndarray) -> np.ndarray:
     Inversion of Euler Rodriguez Formula
     """
     val = 0.5 * (np.trace(R) - 1)
-    if val > DEF_S03M_CLOSE_TO_ONE:
-        return np.zeros(3)
+    if val > 1.0:
+        val = 1.0
+    elif val < -1.0:
+        val = -1.0
     if val < DEF_S03M_CLOSE_TO_MINUS_ONE:
         if R[0, 0] > DEF_S03M_CLOSE_TO_ONE:
             return np.array([np.pi, 0, 0])
@@ -120,7 +122,11 @@ def rotmat2euler(R: np.ndarray) -> np.ndarray:
         return np.array([0, 0, np.pi])
     Th = np.arccos(val)
     Theta = np.array([(R[2, 1] - R[1, 2]), (R[0, 2] - R[2, 0]), (R[1, 0] - R[0, 1])])
-    Theta = Th * 0.5 / np.sin(Th) * Theta
+    if Th < 1e-6:
+        scale = 0.5 + Th * Th / 12.0
+    else:
+        scale = 0.5 * Th / np.sin(Th)
+    Theta = scale * Theta
     return Theta
 
 

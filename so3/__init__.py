@@ -255,5 +255,5 @@ from .transforms.transform_statevec import (
 from .transforms.transform_units import array_conversion
 
 
-# legacy method
+# legacy methods
 from .SO3Methods import phi2rotx, phi2roty, phi2rotz

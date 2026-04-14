@@ -81,9 +81,9 @@ def _rotmat2euler_sv(R: np.ndarray) -> np.ndarray:
     elif val < -1.0:
         val = -1.0
 
-    if val > DEF_EULER_CLOSE_TO_ONE:
-        out[0] = 0.0; out[1] = 0.0; out[2] = 0.0
-        return out
+    # if val > DEF_EULER_CLOSE_TO_ONE:
+    #     out[0] = 0.0; out[1] = 0.0; out[2] = 0.0
+    #     return out
 
     if val < DEF_EULER_CLOSE_TO_MINUS_ONE:
         r00, r11, r22 = R[0, 0], R[1, 1], R[2, 2]
@@ -681,9 +681,9 @@ def rotmat2euler_single(R: np.ndarray) -> np.ndarray:
     elif val < -1.0:
         val = -1.0
 
-    if val > DEF_EULER_CLOSE_TO_ONE:
-        out[0] = 0.0; out[1] = 0.0; out[2] = 0.0
-        return out
+    # if val > DEF_EULER_CLOSE_TO_ONE:
+    #     out[0] = 0.0; out[1] = 0.0; out[2] = 0.0
+    #     return out
 
     if val < DEF_EULER_CLOSE_TO_MINUS_ONE:
         r00, r11, r22 = R[0, 0], R[1, 1], R[2, 2]
