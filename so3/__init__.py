@@ -170,6 +170,7 @@ from .SE3 import (
 )
 
 from .se3_junction_methods import (
+    X_inv,
     X2g,
     g2X,
     X2glh,
