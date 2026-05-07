@@ -127,6 +127,11 @@ def rotmat2euler(R: np.ndarray) -> np.ndarray:
     else:
         scale = 0.5 * Th / np.sin(Th)
     Theta = scale * Theta
+    # clamp output to [-pi, pi] to avoid issues with periodicity in downstream applications
+    out_norm_sq = Theta[0]*Theta[0] + Theta[1]*Theta[1] + Theta[2]*Theta[2]
+    if out_norm_sq > np.pi * np.pi:
+        s = np.pi / np.sqrt(out_norm_sq)
+        Theta = Theta * s
     return Theta
 
 

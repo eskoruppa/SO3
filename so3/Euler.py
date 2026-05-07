@@ -11,9 +11,6 @@ from .generators import _hat_map_sv
 ############### SO3 Methods ##############################################################################
 ##########################################################################################################
 
-# True zero-rotation cutoff (do NOT use for numerical stabilization)
-DEF_EULER_EPSILON = 1e-12
-
 # Thresholds for detecting angles close to 0 and close to pi via val = 0.5*(tr(R)-1)
 DEF_EULER_CLOSE_TO_ONE = 1.0 - 1e-10
 DEF_EULER_CLOSE_TO_MINUS_ONE = -1.0 + 1e-10
@@ -37,9 +34,6 @@ DEF_AXIS_COMP_EPS = 1e-15          # avoid division by ~0 in pi-axis extraction
 @cond_jit(nopython=True, cache=True)
 def _euler2rotmat_sv(Omega: np.ndarray) -> np.ndarray:
     Om = math.sqrt(Omega[0]*Omega[0] + Omega[1]*Omega[1] + Omega[2]*Omega[2])
-    if Om < DEF_EULER_EPSILON:
-        return np.eye(3, dtype=np.double)
-
     if Om < DEF_EULER_SERIES_SMALL:
         Om2 = Om * Om
         Om4 = Om2 * Om2
@@ -136,6 +130,13 @@ def _rotmat2euler_sv(R: np.ndarray) -> np.ndarray:
     out[0] = scale * vx
     out[1] = scale * vy
     out[2] = scale * vz
+
+    # clamp output to [-pi, pi] to avoid issues with periodicity in downstream applications
+    out_norm_sq = out[0]*out[0] + out[1]*out[1] + out[2]*out[2]
+    if out_norm_sq > math.pi * math.pi:
+        s = math.pi / math.sqrt(out_norm_sq)
+        out[0] *= s; out[1] *= s; out[2] *= s
+
     return out
 
 
@@ -637,9 +638,6 @@ def se3_rotmats2eulers(se3: np.ndarray, rotation_first: bool = True) -> np.ndarr
 @cond_jit(nopython=True, cache=True)
 def euler2rotmat_single(Omega: np.ndarray) -> np.ndarray:
     Om = math.sqrt(Omega[0]*Omega[0] + Omega[1]*Omega[1] + Omega[2]*Omega[2])
-    if Om < DEF_EULER_EPSILON:
-        return np.eye(3, dtype=np.double)
-
     if Om < DEF_EULER_SERIES_SMALL:
         Om2 = Om * Om
         Om4 = Om2 * Om2
@@ -737,6 +735,13 @@ def rotmat2euler_single(R: np.ndarray) -> np.ndarray:
     out[0] = scale * vx
     out[1] = scale * vy
     out[2] = scale * vz
+
+    # clamp output to [-pi, pi] to avoid issues with periodicity in downstream applications
+    out_norm_sq = out[0]*out[0] + out[1]*out[1] + out[2]*out[2]
+    if out_norm_sq > math.pi * math.pi:
+        s = math.pi / math.sqrt(out_norm_sq)
+        out[0] *= s; out[1] *= s; out[2] *= s
+
     return out
 
 
