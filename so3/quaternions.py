@@ -279,6 +279,43 @@ def mats2quats(mats: np.ndarray) -> np.ndarray:
     return quats
 
 
+@cond_jit(nopython=True, cache=True)
+def normalize_quat_numba(q: np.ndarray) -> np.ndarray:
+    """Normalize a single quaternion (4,) to unit length. Returns the input unchanged if norm is zero."""
+    norm = np.sqrt(q[0]*q[0] + q[1]*q[1] + q[2]*q[2] + q[3]*q[3])
+    if norm == 0.0:
+        return q.copy()
+    inv = 1.0 / norm
+    out = np.empty(4, dtype=np.float64)
+    out[0] = q[0] * inv
+    out[1] = q[1] * inv
+    out[2] = q[2] * inv
+    out[3] = q[3] * inv
+    return out
+
+
+def normalize_quats(quats: np.ndarray) -> np.ndarray:
+    """Normalize quaternion(s) to unit length.
+
+    Accepts any shape (..., 4). Returns an array of the same shape where
+    every quaternion along the last axis has been divided by its norm.
+    Quaternions with zero norm are returned unchanged.
+
+    Args:
+        quats (np.ndarray): Quaternion(s), last dimension must be 4.
+
+    Returns:
+        np.ndarray: Unit quaternion(s) of the same shape as the input.
+    """
+    q = np.asarray(quats, dtype=np.float64)
+    if q.shape[-1] != 4:
+        raise ValueError(f"Last dimension must be 4, got {q.shape[-1]}.")
+    norms = np.linalg.norm(q, axis=-1, keepdims=True)   # (..., 1)
+    # Avoid division by zero: where norm is 0 keep original values
+    safe_norms = np.where(norms == 0.0, 1.0, norms)
+    return q / safe_norms
+
+
 if __name__ == '__main__':
     
     from .Euler import euler2rotmat

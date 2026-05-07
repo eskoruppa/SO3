@@ -200,7 +200,9 @@ from .quaternions import (
     mat2quat,
     quats2mats,
     mats2quats,
-    quats2rotmats #depricated!
+    quats2rotmats, #depricated!
+    normalize_quat_numba,
+    normalize_quats,
 )
 
 from .rotation_methods import rotmat_align_vector
