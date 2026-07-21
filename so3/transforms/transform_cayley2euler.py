@@ -33,6 +33,7 @@ def se3_euler2cayley(
     Raises:
         ValueError: If vectors are not 3 or 6 dimensional.
     """
+    eulers = np.asarray(eulers, dtype=float)  # avoid int-dtype truncation in the 6-vector copy path
     if eulers.shape[-1] == 3:
         translations_included = False
     elif eulers.shape[-1] == 6:
@@ -72,6 +73,7 @@ def se3_cayley2euler(
     Raises:
         ValueError: If vectors are not 3 or 6 dimensional.
     """
+    cayleys = np.asarray(cayleys, dtype=float)  # avoid int-dtype truncation in the 6-vector copy path
     if cayleys.shape[-1] == 3:
         translations_included = False
     elif cayleys.shape[-1] == 6:

@@ -29,11 +29,21 @@ def rotmat_align_vector(vec_from: np.ndarray, vec_to: np.ndarray) -> np.ndarray:
     - For aligned vectors (dot product ≈ 1), returns identity matrix.
     - For anti-parallel vectors (dot product ≈ -1), rotates 180° around an 
       arbitrary perpendicular axis.
-    - For general case, rotates around the axis n = vec_from × vec_to by angle 
+    - For general case, rotates around the axis n = vec_from × vec_to by angle
       θ = arccos(vec_from · vec_to).
+
+    Raises
+    ------
+    ValueError
+        If either input vector has (near) zero norm, which would otherwise
+        produce a silent NaN result from the 0/0 normalization.
     """
-    vec_from = vec_from / np.linalg.norm(vec_from)
-    vec_to = vec_to / np.linalg.norm(vec_to)
+    norm_from = np.linalg.norm(vec_from)
+    norm_to = np.linalg.norm(vec_to)
+    if norm_from < 1e-12 or norm_to < 1e-12:
+        raise ValueError("rotmat_align_vector: input vectors must have non-zero norm.")
+    vec_from = vec_from / norm_from
+    vec_to = vec_to / norm_to
     dot = vec_from.dot(vec_to)
     
     # Already aligned

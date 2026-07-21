@@ -2,8 +2,7 @@
 **build/
 **__pycache__
 **.c
-
-# ignore test files and folders
+**dist/
 
 # ignore testdata directory
 **test*/

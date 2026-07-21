@@ -23,6 +23,11 @@ def _cayley2euler_sv(cayley: np.ndarray) -> np.ndarray:
 
 @cond_jit(nopython=True, cache=True)
 def _euler2cayley_sv(euler: np.ndarray) -> np.ndarray:
+    """Euler (rotation-vector) -> Cayley vector.
+
+    Singular at rotation angle |euler| = pi (tan(pi/2) -> inf): the Cayley
+    parametrization is only valid for |euler| < pi.
+    """
     norm = np.linalg.norm(euler)
     if norm < 1e-14:
         return np.zeros(3)
@@ -39,6 +44,11 @@ def _cayley2euler_factor_sv(cayley: np.ndarray) -> float:
 
 @cond_jit(nopython=True, cache=True)
 def _euler2cayley_factor_sv(euler: np.ndarray) -> float:
+    """Scalar factor f such that cayley = f * euler.
+
+    Singular at rotation angle |euler| = pi (tan(pi/2) -> inf): valid only for
+    |euler| < pi.
+    """
     norm = np.linalg.norm(euler)
     if norm < 1e-14:
         return 1.0
@@ -47,6 +57,12 @@ def _euler2cayley_factor_sv(euler: np.ndarray) -> float:
 
 @cond_jit(nopython=True, cache=True)
 def _cayley2euler_linearexpansion_sv(cayley_gs: np.ndarray) -> np.ndarray:
+    """Jacobian d(euler)/d(cayley) at the Cayley groundstate ``cayley_gs``.
+
+    Well defined for all finite Cayley vectors, but the corresponding rotation
+    angle approaches pi as |cayley| -> inf; the map is intended for groundstates
+    with rotation angle < pi (|cayley| finite).
+    """
     cayley_norm = np.linalg.norm(cayley_gs)
     if cayley_norm < 1e-14:
         return np.eye(3)
@@ -62,6 +78,11 @@ def _cayley2euler_linearexpansion_sv(cayley_gs: np.ndarray) -> np.ndarray:
 
 @cond_jit(nopython=True, cache=True)
 def _euler2cayley_linearexpansion_sv(euler_gs: np.ndarray) -> np.ndarray:
+    """Jacobian d(cayley)/d(euler) at the Euler groundstate ``euler_gs``.
+
+    Singular at rotation angle |euler| = pi (contains 1/cos(|euler|/2)^2, which
+    diverges at pi): valid only for |euler| < pi.
+    """
     euler_norm = np.linalg.norm(euler_gs)
     if euler_norm < 1e-14:
         return np.eye(3)
@@ -181,6 +202,7 @@ def cayley2euler_batch(cayley: np.ndarray) -> np.ndarray:
     Returns:
         np.ndarray: Euler vector(s) with the same shape as the input.
     """
+    cayley = np.asarray(cayley, dtype=float)
     if cayley.ndim == 1:
         return _cayley2euler_sv(cayley)
     orig_shape = cayley.shape
@@ -202,6 +224,7 @@ def euler2cayley_batch(euler: np.ndarray) -> np.ndarray:
     Returns:
         np.ndarray: Cayley vector(s) with the same shape as the input.
     """
+    euler = np.asarray(euler, dtype=float)
     if euler.ndim == 1:
         return _euler2cayley_sv(euler)
     orig_shape = euler.shape

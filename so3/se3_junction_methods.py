@@ -89,11 +89,14 @@ def g2X(g: np.ndarray) -> np.ndarray:
 
 @cond_jit(nopython=True,cache=True)
 def X2glh(X: np.ndarray) -> np.ndarray:
-    """Compute the left-midpoint homogeneous transform for a 6D vector.
+    """Compute the left-midpoint (left half-step) homogeneous transform for a 6D vector.
 
-    This returns `g_lh = exp(0.5 * xi)` in matrix form where `xi = [omega, v]`.
-    For this left-midpoint representation the translation in `g_lh` is simply
-    half the original translation.
+    Returns the split half-transform `g_lh` chosen so that the full transform
+    decomposes as `g = g_lh @ g_rh` (see `X2grh`). Its rotation is the
+    half-rotation `euler2rotmat(0.5 * omega)` and its translation is simply half
+    the original translation, `0.5 * v`. Note: this is a split half-transform,
+    NOT the SE(3) matrix exponential `exp(0.5 * xi)` (that would fold `v` through
+    the SE(3) left Jacobian).
 
     Parameters
     ----------
@@ -144,7 +147,8 @@ def glh2X(glh: np.ndarray) -> np.ndarray:
     Parameters
     ----------
     glh : ndarray, shape (4,4)
-        Left-midpoint homogeneous transform (g_lh = exp(0.5*xi)).
+        Left-midpoint (left half-step) homogeneous transform, as returned by
+        `X2glh` (a split half-transform, not the SE(3) exponential of 0.5*xi).
 
     Returns
     -------
@@ -218,38 +222,43 @@ def grh2g(grh: np.ndarray) -> np.ndarray:
 
 @cond_jit(nopython=True,cache=True)
 def g2glh_inv(g: np.ndarray) -> np.ndarray:
-    """Compute left-midpoint `glh` directly from homogeneous matrix `g`.
+    """Compute the inverse left-midpoint transform directly from homogeneous matrix `g`.
 
-    This is a thin wrapper: `g2glh(g) == X2glh(g2X(g))`.
+    Returns the matrix inverse of the left half-step transform `glh`.
+    Thin wrapper: `g2glh_inv(g) == X2glh_inv(g2X(g))`.
     """
     return X2glh_inv(g2X(g))
 
 @cond_jit(nopython=True,cache=True)
 def g2grh_inv(g: np.ndarray) -> np.ndarray:
-    """Compute right-midpoint `grh` directly from homogeneous matrix `g`.
+    """Compute the inverse right-midpoint transform directly from homogeneous matrix `g`.
 
-    This is a thin wrapper: `g2grh(g) == X2grh(g2X(g))`.
+    Returns the matrix inverse of the right half-step transform `grh`.
+    Thin wrapper: `g2grh_inv(g) == X2grh_inv(g2X(g))`.
     """
     return X2grh_inv(g2X(g))
 
 @cond_jit(nopython=True,cache=True)
 def glh2g_inv(glh: np.ndarray) -> np.ndarray:
-    """Reconstruct full homogeneous matrix `g` from left-midpoint `glh`.
+    """Reconstruct the inverse full homogeneous matrix from left-midpoint `glh`.
 
-    This is a thin wrapper around `X2g(glh2X(glh))`.
+    Returns the matrix inverse of the full transform `g` recovered from `glh`.
+    Thin wrapper: `glh2g_inv(glh) == X2g_inv(glh2X(glh))`.
     """
     return X2g_inv(glh2X(glh))
 
 @cond_jit(nopython=True,cache=True)
 def grh2g_inv(grh: np.ndarray) -> np.ndarray:
-    """Reconstruct full homogeneous matrix `g` from right-midpoint `grh`.
+    """Reconstruct the inverse full homogeneous matrix from right-midpoint `grh`.
 
-    This is a thin wrapper around `X2g(grh2X(grh))`.
+    Returns the matrix inverse of the full transform `g` recovered from `grh`.
+    Thin wrapper: `grh2g_inv(grh) == X2g_inv(grh2X(grh))`.
     """
     return X2g_inv(grh2X(grh))
 
 @cond_jit(nopython=True,cache=True)
 def X2g_inv(X: np.ndarray) -> np.ndarray:
+    """Return the 4x4 matrix inverse of the full transform ``X2g(X)`` for SE(3) vector ``X``."""
     g = np.zeros((4, 4), dtype=np.float64)
     R = euler2rotmat(X[:3])
     w = X[3:]
@@ -260,6 +269,7 @@ def X2g_inv(X: np.ndarray) -> np.ndarray:
 
 @cond_jit(nopython=True,cache=True)
 def X2glh_inv(X: np.ndarray) -> np.ndarray:
+    """Return the 4x4 matrix inverse of the left half-step transform ``X2glh(X)``."""
     glh = np.zeros((4, 4), dtype=np.float64)
     sqrtR = euler2rotmat(0.5 * X[:3])
     glh[:3, :3] = sqrtR.T
@@ -269,6 +279,7 @@ def X2glh_inv(X: np.ndarray) -> np.ndarray:
 
 @cond_jit(nopython=True,cache=True)
 def X2grh_inv(X: np.ndarray) -> np.ndarray:
+    """Return the 4x4 matrix inverse of the right half-step transform ``X2grh(X)``."""
     grh = np.zeros((4, 4), dtype=np.float64)
     sqrtR = euler2rotmat(0.5 * X[:3])
     grh[:3, :3] = sqrtR.T
@@ -293,12 +304,17 @@ def A_lh(X0: np.ndarray) -> np.ndarray:
     -------
     A : ndarray, shape (6, 6)
         Transformation matrix linearized around X0.
+
+    Notes
+    -----
+    Singular at |omega| = |X0[:3]| = 2*k*pi (k >= 1): the inverse right Jacobian
+    diverges there, so the returned matrix contains non-finite entries.
     """
     A = np.zeros((6, 6), dtype=np.float64)
 
     Jr_phihalf = right_jacobian(0.5 * X0[:3])
     Jri_phi    = inverse_right_jacobian(X0[:3])
-    
+
     A[:3,:3] = Jr_phihalf @ Jri_phi
     A[3:,3:] = euler2rotmat(0.5*X0[:3])
     return 0.5*A
@@ -316,6 +332,11 @@ def A_rh(X0: np.ndarray) -> np.ndarray:
     -------
     A : ndarray, shape (6, 6)
         Transformation matrix linearized around X0.
+
+    Notes
+    -----
+    Singular at |omega| = |X0[:3]| = 2*k*pi (k >= 1): the inverse right Jacobian
+    diverges there, so the returned matrix contains non-finite entries.
     """
     A = np.zeros((6, 6), dtype=np.float64)
 

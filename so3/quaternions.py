@@ -131,11 +131,24 @@ def quats2rotmats(quaternions_array: np.ndarray) -> np.ndarray:
 
 @cond_jit(nopython=True, cache=True)
 def quat2mat_numba(quat):
-    """Numba core: quaternion (4,) -> rotation matrix (3,3), row-major like original."""
+    """Numba core: quaternion (4,) -> rotation matrix (3,3), row-major like original.
+
+    The input quaternion is normalized to unit length internally, so a non-unit
+    input still yields a proper rotation matrix (a zero quaternion is left as-is).
+    """
     w = quat[0]
     i = quat[1]
     j = quat[2]
     k = quat[3]
+
+    # Normalize to unit length so the result is always a proper rotation matrix.
+    norm = np.sqrt(w * w + i * i + j * j + k * k)
+    if norm > 0.0:
+        inv = 1.0 / norm
+        w *= inv
+        i *= inv
+        j *= inv
+        k *= inv
 
     w2 = w * w
     i2 = i * i
@@ -299,10 +312,18 @@ def quats2mats_vectorized(quats: np.ndarray) -> np.ndarray:
 
     Returns:
         np.ndarray: Rotation matrix(es) of shape ``quats.shape[:-1] + (3, 3)``.
+
+    Notes:
+        Quaternions are normalized to unit length internally, so non-unit inputs
+        still yield proper rotation matrices (zero quaternions are left as-is).
     """
     q = np.asarray(quats, dtype=np.float64)
     if q.shape[-1] != 4:
         raise ValueError(f"Last dimension must be 4, got {q.shape[-1]}.")
+
+    # Normalize to unit length so each result is always a proper rotation matrix.
+    norms = np.sqrt(np.sum(q * q, axis=-1, keepdims=True))
+    q = q / np.where(norms > 0.0, norms, 1.0)
 
     w = q[..., 0]
     i = q[..., 1]

@@ -15,17 +15,18 @@ requires-python = ">=3.8"
 dependencies = [
     "numpy",
     "scipy",
+    "pycondec>=0.0.1",
 ]
 
 [project.optional-dependencies]
-numba    = ["numba"]
-pycondec = ["pyConDec"]
-all      = ["numba", "pyConDec"]
+# numba is optional: cond_jit transparently degrades to pure Python without it.
+numba = ["numba"]
 
 [project.urls]
 Homepage = "https://github.com/eskoruppa/SO3"
 Repository = "https://github.com/eskoruppa/SO3"
 
 [tool.setuptools.packages.find]
-where = ["."]
+include = ["so3*"]
+exclude = ["so3.pyConDec*", "tests*", "build*"]
 

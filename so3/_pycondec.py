@@ -11,6 +11,7 @@ Raises ImportError with a helpful message if neither is available.
 
 import sys
 import pathlib
+import warnings
 
 _PYCONDEC_SUBMODULE = pathlib.Path(__file__).parent / "pyConDec"
 
@@ -43,5 +44,26 @@ except (ImportError, ModuleNotFoundError):
             "    or from source:\n"
             "      git clone https://github.com/eskoruppa/pyConDec.git && cd pyConDec && pip install .\n"
         ) from e
+
+def _numba_active() -> bool:
+    """Return True if pyConDec resolved a usable numba.jit, i.e. cond_jit will
+    actually JIT-compile. Mirrors pyConDec's own detection (its ``jit`` symbol
+    is None when numba is missing or fails to import), so it stays accurate even
+    when numba is installed but broken."""
+    try:
+        from pycondec.conditional_numba import jit  # noqa: E402
+    except (ImportError, ModuleNotFoundError):
+        return False
+    return jit is not None
+
+if not _numba_active():
+    warnings.warn(
+        "numba is not available; SO3's numba-accelerated routines are running "
+        "in pure-Python fallback mode, which is substantially slower. Install "
+        "the optional speedup with:  pip install 'SO3[numba]'",
+        RuntimeWarning,
+        stacklevel=2,
+    )
+
 
 __all__ = ["cond_jit", "cond_jitclass"]

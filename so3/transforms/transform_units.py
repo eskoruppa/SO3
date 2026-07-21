@@ -62,8 +62,8 @@ def array_conversion(
         if dofs is None:
             return array * factor
         
-        # reduce to be converted degrees of freedom    
-        carray = np.copy(array)
+        # reduce to be converted degrees of freedom
+        carray = np.array(array, dtype=float)  # float copy (in-place scaling by a non-integer factor)
         dofs = sorted(list(set([dof % block_dim for dof in dofs])))
         indices = np.concatenate([np.arange(dof, array.shape[0], block_dim) for dof in dofs])
         
@@ -117,7 +117,7 @@ if __name__ == '__main__':
     
     stiff = np.ones((12,12))
     factor = 5
-    nmat = conversion(stiff,factor,block_dim=6,dofs=[0,1,2])
+    nmat = array_conversion(stiff,factor,block_dim=6,dofs=[0,1,2])
     print(nmat)
     
             

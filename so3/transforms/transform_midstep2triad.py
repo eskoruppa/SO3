@@ -46,7 +46,7 @@ def midstep2triad(
     if vecs.shape[-1] != 6:
         raise ValueError(f"Expected set of 6-vectors. Instead received shape {vecs.shape}")
     
-    nvecs = np.copy(vecs)
+    nvecs = np.array(vecs, dtype=float)  # float working copy (rotated translations are non-integer)
     if len(vecs.shape) > 2:
         for i, vec in enumerate(vecs):
             nvecs[i] = midstep2triad(vec,rotation_map=rotation_map,rotation_first=rotation_first)
@@ -121,7 +121,7 @@ def triad2midstep(
     if vecs.shape[-1] != 6:
         raise ValueError(f"Expected set of 6-vectors. Instead received shape {vecs.shape}")
     
-    nvecs = np.copy(vecs)
+    nvecs = np.array(vecs, dtype=float)  # float working copy (rotated translations are non-integer)
     if len(vecs.shape) > 2:
         for i, vec in enumerate(vecs):
             nvecs[i] = triad2midstep(vec,rotation_map=rotation_map,rotation_first=rotation_first)

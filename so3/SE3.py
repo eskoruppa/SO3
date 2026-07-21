@@ -21,7 +21,8 @@ from .generators import hat_map_single
 @cond_jit(nopython=True,cache=True)
 def _se3_inverse_sv(g: np.ndarray) -> np.ndarray:
     """Inverse of element of SE3"""
-    inv = np.empty(g.shape, dtype=g.dtype)
+    g = g.astype(np.float64)  # ensure float (numba '@' has no integer BLAS path)
+    inv = np.empty(g.shape, dtype=np.float64)
     inv[:3, :3] = g[:3, :3].T
     inv[:3, 3] = -inv[:3, :3] @ g[:3, 3]
     inv[3, :]  = np.array([0, 0, 0, 1])
@@ -145,6 +146,13 @@ def _se3_algebra2group_stiffmat_sv(
     stiff_algebra: np.ndarray,
     translation_as_midstep: bool = False,
 ) -> np.ndarray:
+    """Congruence transform of an se(3) stiffness matrix from algebra to group split.
+
+    Singular at groundstate rotation-vector norm |Omega| = 2*k*pi (k >= 1): the
+    underlying right Jacobian is singular there, so ``np.linalg.inv`` raises a
+    LinAlgError. Irrelevant for the intended (DNA base-pair) regime where steps
+    are far from 2*pi.
+    """
     HX = _se3_algebra2group_lintrans_sv(
         groundstate_algebra, translation_as_midstep
     )
@@ -158,6 +166,13 @@ def _se3_group2algebra_stiffmat_sv(
     stiff_group: np.ndarray,
     translation_as_midstep: bool = False,
 ) -> np.ndarray:
+    """Congruence transform of an se(3) stiffness matrix from group to algebra split.
+
+    Singular at groundstate rotation-vector norm |Omega| = 2*k*pi (k >= 1): the
+    underlying right Jacobian is singular there, so ``np.linalg.inv`` raises a
+    LinAlgError. Irrelevant for the intended (DNA base-pair) regime where steps
+    are far from 2*pi.
+    """
     HX_inv = _se3_group2algebra_lintrans_sv(
         groundstate_group, translation_as_midstep
     )
@@ -358,28 +373,8 @@ def se3_triads2euler_batch(tau1: np.ndarray, tau2: np.ndarray) -> np.ndarray:
     return _se3_triads2euler_flat(flat1, flat2).reshape(shape + (6,))
 
 
-def se3_midstep2triad_batch(triad_euler: np.ndarray) -> np.ndarray:
+def se3_midstep2triad_batch(midstep_euler: np.ndarray) -> np.ndarray:
     """Convert SE3 Euler vector from midstep to triad convention.
-
-    Parameters
-    ----------
-    triad_euler : (..., 6)
-
-    Returns
-    -------
-    midstep_euler : (..., 6)
-    """
-    triad_euler = np.asarray(triad_euler, dtype=float)
-    if triad_euler.ndim == 1:
-        return _se3_midstep2triad_sv(triad_euler)
-    shape = triad_euler.shape[:-1]
-    n = int(np.prod(np.array(shape)))
-    flat = np.ascontiguousarray(triad_euler.reshape(n, 6))
-    return _se3_midstep2triad_flat(flat).reshape(shape + (6,))
-
-
-def se3_triad2midstep_batch(midstep_euler: np.ndarray) -> np.ndarray:
-    """Convert SE3 Euler vector from triad to midstep convention.
 
     Parameters
     ----------
@@ -391,10 +386,30 @@ def se3_triad2midstep_batch(midstep_euler: np.ndarray) -> np.ndarray:
     """
     midstep_euler = np.asarray(midstep_euler, dtype=float)
     if midstep_euler.ndim == 1:
-        return _se3_triad2midstep_sv(midstep_euler)
+        return _se3_midstep2triad_sv(midstep_euler)
     shape = midstep_euler.shape[:-1]
     n = int(np.prod(np.array(shape)))
     flat = np.ascontiguousarray(midstep_euler.reshape(n, 6))
+    return _se3_midstep2triad_flat(flat).reshape(shape + (6,))
+
+
+def se3_triad2midstep_batch(triad_euler: np.ndarray) -> np.ndarray:
+    """Convert SE3 Euler vector from triad to midstep convention.
+
+    Parameters
+    ----------
+    triad_euler : (..., 6)
+
+    Returns
+    -------
+    midstep_euler : (..., 6)
+    """
+    triad_euler = np.asarray(triad_euler, dtype=float)
+    if triad_euler.ndim == 1:
+        return _se3_triad2midstep_sv(triad_euler)
+    shape = triad_euler.shape[:-1]
+    n = int(np.prod(np.array(shape)))
+    flat = np.ascontiguousarray(triad_euler.reshape(n, 6))
     return _se3_triad2midstep_flat(flat).reshape(shape + (6,))
 
 
@@ -592,7 +607,8 @@ def se3_group2algebra_stiffmat_batch(
 @cond_jit(nopython=True,cache=True)
 def se3_inverse_single(g: np.ndarray) -> np.ndarray:
     """Inverse of element of SE3"""
-    inv = np.empty(g.shape, dtype=g.dtype)
+    g = g.astype(np.float64)  # ensure float (numba '@' has no integer BLAS path)
+    inv = np.empty(g.shape, dtype=np.float64)
     inv[:3, :3] = g[:3, :3].T
     inv[:3, 3] = -inv[:3, :3] @ g[:3, 3]
     inv[3, :]  = np.array([0, 0, 0, 1])
@@ -719,7 +735,10 @@ def se3_algebra2group_stiffmat_single(
     stiff_algebra: np.ndarray,
     translation_as_midstep: bool = False,
 ) -> np.ndarray:
-    """Converts stiffness matrix from algebra-level (vector) splitting between static and dynamic component to group-level (matrix) splitting. Optionally, the transformations from midstep triad definition to triad definition of the translational component may also be included."""
+    """Converts stiffness matrix from algebra-level (vector) splitting between static and dynamic component to group-level (matrix) splitting. Optionally, the transformations from midstep triad definition to triad definition of the translational component may also be included.
+
+    Singular at groundstate rotation-vector norm |Omega| = 2*k*pi (k >= 1): the underlying right Jacobian is singular there and np.linalg.inv raises a LinAlgError. Irrelevant for the intended (DNA base-pair) regime.
+    """
     HX = se3_algebra2group_lintrans_single(
         groundstate_algebra, translation_as_midstep
     )
@@ -736,6 +755,8 @@ def se3_group2algebra_stiffmat_single(
 ) -> np.ndarray:
     """Converts stiffness matrix from group-level (matrix) splitting between static and dynamic component to algebra-level (vector) splitting. Optionally, the transformations from midstep triad definition to triad definition of the translational component may also be included. I.e. the final
     definition will assume a midstep triad definition of the translational component.
+
+    Singular at groundstate rotation-vector norm |Omega| = 2*k*pi (k >= 1): the underlying right Jacobian is singular there and np.linalg.inv raises a LinAlgError. Irrelevant for the intended (DNA base-pair) regime.
     """
     HX_inv = se3_group2algebra_lintrans_single(
         groundstate_group, translation_as_midstep

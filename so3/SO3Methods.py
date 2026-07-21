@@ -184,6 +184,8 @@ def rotmat_align_vector(vec_from: np.ndarray, vec_to: np.ndarray) -> np.ndarray:
     # General case
     n = np.cross(vec_from, vec_to)
     n = n / np.linalg.norm(n)
-    angle = np.arccos(np.clip(dot, -1.0, 1.0))
+    # Clamp with scalar max/min (np.clip on a scalar is unsupported under numba nopython)
+    dot_clamped = max(-1.0, min(1.0, dot))
+    angle = np.arccos(dot_clamped)
     Theta = angle * n
-    return euler2rotmat(Theta)  
+    return euler2rotmat(Theta)

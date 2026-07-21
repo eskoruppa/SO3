@@ -9,29 +9,31 @@ import numpy as np
 
 def statevec2vecs(statevec: np.ndarray, vdim: int) -> np.ndarray:  # shape (..., vdim*N) -> (..., N, vdim)
     """Reshape state vectors from flat format (vdim*N) to vector format (N, vdim).
-    
+
     Converts the last dimension from flat state vector representation to structured
-    vector format. For example, converts (3*N,) to (N, 3) for 3D vectors.
+    vector format. For example, converts (3*N,) to (N, 3) for 3D vectors. The last
+    dimension is always split unconditionally, so a single-site flat vector of length
+    vdim maps to (..., 1, vdim); this makes the map an unambiguous bijection with
+    :func:`vecs2statevec` for every N (including N == 1).
 
     Args:
-        statevec: State vector array with last dimension of size (vdim*N). If already
-                 in shape (..., vdim), returns unchanged.
+        statevec: State vector array with last dimension of size (vdim*N).
         vdim: Dimension of individual vectors (e.g., 3 for 3D, 6 for SE(3)).
 
     Returns:
         Reshaped array with last dimension split into (N, vdim).
-        
+
     Raises:
         ValueError: If last dimension size is not a multiple of vdim.
     """
-    if statevec.shape[-1] == vdim:
-        return statevec
-    
     if statevec.shape[-1] % vdim != 0:
         raise ValueError(
-            f"statevec2vecs: statevec is inconsistent with list of euler vectors. The number of entries needs to be a multiple of vdim. len(statevec)%vdim = {len(statevec)%vdim}"
+            f"statevec2vecs: statevec is inconsistent with list of euler vectors. "
+            f"The size of the last dimension needs to be a multiple of vdim. "
+            f"statevec.shape[-1] % vdim = {statevec.shape[-1] % vdim} "
+            f"(statevec.shape[-1] = {statevec.shape[-1]}, vdim = {vdim})"
         )
-    
+
     shape = list(statevec.shape)
     newshape = shape[:-1] + [shape[-1] // vdim, vdim]
     return np.reshape(statevec, tuple(newshape))
@@ -49,7 +51,15 @@ def vecs2statevec(vecs: np.ndarray) -> np.ndarray:  # shape (..., N, vdim) -> (.
 
     Returns:
         Flattened array with last two dimensions merged into (vdim*N,).
+
+    Raises:
+        ValueError: If the input has fewer than 2 dimensions.
     """
+    if vecs.ndim < 2:
+        raise ValueError(
+            f"vecs2statevec expects at least 2 dimensions (..., N, vdim), "
+            f"got ndim = {vecs.ndim} with shape {vecs.shape}."
+        )
     shape = list(vecs.shape)
     newshape = shape[:-1]
     newshape[-1] *= shape[-1]

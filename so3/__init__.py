@@ -100,6 +100,8 @@ from .Euler import (
     inverse_left_jacobian_single,
     se3_euler2rotmat_single,
     se3_rotmat2euler_single,
+    se3_eulers2rotmats_single,
+    se3_rotmats2eulers_single,
 )
 
 from .generators import (
