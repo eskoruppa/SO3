@@ -249,7 +249,10 @@ def mat2quat(mat) -> np.ndarray:
     return mat2quat_numba(m)
 
 
-def quats2mats(quats: np.ndarray) -> np.ndarray:
+def quats2mats(quats: np.ndarray, use_vectorized: bool = True) -> np.ndarray:
+    if use_vectorized:
+        return quats2mats_vectorized(quats)
+
     if len(quats.shape) == 1:
         return quat2mat_numba(quats)
 
@@ -264,7 +267,10 @@ def quats2mats(quats: np.ndarray) -> np.ndarray:
     return mats
 
 
-def mats2quats(mats: np.ndarray) -> np.ndarray:
+def mats2quats(mats: np.ndarray, use_vectorized: bool = True) -> np.ndarray:
+    if use_vectorized:
+        return mats2quats_vectorized(mats)
+
     if len(mats.shape) == 2:
         return mat2quat_numba(mats)
 
@@ -277,6 +283,129 @@ def mats2quats(mats: np.ndarray) -> np.ndarray:
     for i in range(len(mats)):
        quats[i] = mat2quat_numba(mats[i])
     return quats
+
+
+def quats2mats_vectorized(quats: np.ndarray) -> np.ndarray:
+    """Vectorized quaternion(s) -> rotation matrix(es).
+
+    Fully vectorized NumPy replacement for :func:`quats2mats`. Accepts any
+    input of shape ``(..., 4)`` and returns rotation matrices of shape
+    ``(..., 3, 3)`` in a single batched computation (no Python loops, no
+    per-element numba calls). Numerically identical to applying
+    :func:`quat2mat_numba` element-wise.
+
+    Args:
+        quats (np.ndarray): Quaternion(s) ``[w, i, j, k]``, last dim must be 4.
+
+    Returns:
+        np.ndarray: Rotation matrix(es) of shape ``quats.shape[:-1] + (3, 3)``.
+    """
+    q = np.asarray(quats, dtype=np.float64)
+    if q.shape[-1] != 4:
+        raise ValueError(f"Last dimension must be 4, got {q.shape[-1]}.")
+
+    w = q[..., 0]
+    i = q[..., 1]
+    j = q[..., 2]
+    k = q[..., 3]
+
+    w2 = w * w
+    i2 = i * i
+    j2 = j * j
+    k2 = k * k
+    twoij = 2.0 * i * j
+    twoik = 2.0 * i * k
+    twojk = 2.0 * j * k
+    twoiw = 2.0 * i * w
+    twojw = 2.0 * j * w
+    twokw = 2.0 * k * w
+
+    mats = np.empty(q.shape[:-1] + (3, 3), dtype=np.float64)
+
+    # row 0
+    mats[..., 0, 0] = w2 + i2 - j2 - k2
+    mats[..., 0, 1] = twoij - twokw
+    mats[..., 0, 2] = twojw + twoik
+    # row 1
+    mats[..., 1, 0] = twoij + twokw
+    mats[..., 1, 1] = w2 - i2 + j2 - k2
+    mats[..., 1, 2] = twojk - twoiw
+    # row 2
+    mats[..., 2, 0] = twoik - twojw
+    mats[..., 2, 1] = twojk + twoiw
+    mats[..., 2, 2] = w2 - i2 - j2 + k2
+
+    return mats
+
+
+def mats2quats_vectorized(mats: np.ndarray) -> np.ndarray:
+    """Vectorized rotation matrix(es) -> quaternion(s).
+
+    Fully vectorized NumPy replacement for :func:`mats2quats`. Accepts any
+    input of shape ``(..., 3, 3)`` and returns quaternions ``[w, x, y, z]`` of
+    shape ``(..., 4)`` in a single batched computation (no Python loops, no
+    per-element numba calls). Reproduces the exact branch selection and final
+    normalization of :func:`mat2quat_numba`.
+
+    Args:
+        mats (np.ndarray): Rotation matrix(es), last two dims must be ``(3, 3)``.
+
+    Returns:
+        np.ndarray: Unit quaternion(s) of shape ``mats.shape[:-2] + (4,)``.
+    """
+    m = np.asarray(mats, dtype=np.float64)
+    if m.shape[-2:] != (3, 3):
+        raise ValueError(f"Last two dimensions must be (3, 3), got {m.shape[-2:]}.")
+
+    m00 = m[..., 0, 0]
+    m01 = m[..., 0, 1]
+    m02 = m[..., 0, 2]
+    m10 = m[..., 1, 0]
+    m11 = m[..., 1, 1]
+    m12 = m[..., 1, 2]
+    m20 = m[..., 2, 0]
+    m21 = m[..., 2, 1]
+    m22 = m[..., 2, 2]
+
+    tr = m00 + m11 + m22
+
+    q0sq = 0.25 * (tr + 1.0)
+    q1sq = q0sq - 0.5 * (m11 + m22)
+    q2sq = q0sq - 0.5 * (m00 + m22)
+    q3sq = q0sq - 0.5 * (m00 + m11)
+
+    # Branch selection: pick the largest component for numerical stability,
+    # matching the if/elif chain of mat2quat_numba exactly.
+    c0 = q0sq >= 0.25
+    c1 = (~c0) & (q1sq >= 0.25)
+    c2 = (~c0) & (~c1) & (q2sq >= 0.25)
+    c3 = ~(c0 | c1 | c2)
+
+    # sqrt of the squared components; clamp to avoid warnings in unused branches
+    # (the selected branch always has its squared term >= 0.25).
+    r0 = np.sqrt(np.maximum(q0sq, 0.0))
+    r1 = np.sqrt(np.maximum(q1sq, 0.0))
+    r2 = np.sqrt(np.maximum(q2sq, 0.0))
+    r3 = np.sqrt(np.maximum(q3sq, 0.0))
+
+    # 1 / (4 * r), guarded against division by zero in unused branches.
+    d0 = 1.0 / (4.0 * np.where(r0 > 0.0, r0, 1.0))
+    d1 = 1.0 / (4.0 * np.where(r1 > 0.0, r1, 1.0))
+    d2 = 1.0 / (4.0 * np.where(r2 > 0.0, r2, 1.0))
+    d3 = 1.0 / (4.0 * np.where(r3 > 0.0, r3, 1.0))
+
+    conds = [c0, c1, c2, c3]
+
+    q0 = np.select(conds, [r0, (m21 - m12) * d1, (m02 - m20) * d2, (m10 - m01) * d3])
+    q1 = np.select(conds, [(m21 - m12) * d0, r1, (m01 + m10) * d2, (m02 + m20) * d3])
+    q2 = np.select(conds, [(m02 - m20) * d0, (m01 + m10) * d1, r2, (m12 + m21) * d3])
+    q3 = np.select(conds, [(m10 - m01) * d0, (m20 + m02) * d1, (m12 + m21) * d2, r3])
+
+    q = np.stack((q0, q1, q2, q3), axis=-1)
+
+    norms = np.sqrt(np.sum(q * q, axis=-1, keepdims=True))
+    safe_norms = np.where(norms > 0.0, norms, 1.0)
+    return q / safe_norms
 
 
 @cond_jit(nopython=True, cache=True)
