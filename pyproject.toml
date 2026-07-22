@@ -3,9 +3,9 @@ requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "SO3"
-version = "0.0.1"
-description = "A collection of methods for the rotation group SO(3) and SE(3)"
+name = "so3tools"
+version = "0.0.2"
+description = "A collection of methods for the rotation group SO(3)"
 readme = "README.md"
 license = { text = "GPL-2.0" }
 authors = [

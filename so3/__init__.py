@@ -119,7 +119,7 @@ from .generators import (
     hat_map_single, vec_map_single,
 )
 
-from .extend_euler import extend_euler
+from .extend_euler import unwrap_euler, extend_euler
 from .matrices import dots
 from ._pycondec import cond_jit
 

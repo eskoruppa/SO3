@@ -1,60 +1,34 @@
 # SO3
 
-**SO3** is a Python library providing a comprehensive set of mathematical tools for working with the rotation group SO(3) and the special Euclidean group SE(3). It is designed for applications in robotics, structural mechanics, polymer physics, and any domain that requires efficient and numerically stable handling of 3-D rotations and rigid-body transformations.
+**SO3** is a Python library providing a comprehensive set of mathematical tools for working with the rotation group SO(3) and the special Euclidean group SE(3).
 
-The library supports multiple parameterizations of rotations — Euler (rotation) vectors, Cayley vectors, and quaternions — and provides consistent conversion routines between them. All computationally intensive functions can be transparently accelerated with [Numba](https://numba.pydata.org/) JIT compilation via the bundled [pyConDec](https://github.com/eskoruppa/pyConDec) conditional-decorator utility; if Numba is not installed the functions run as plain NumPy code with no changes required.
+The library supports multiple parameterizations of rotations—Euler (rotation) vectors, Cayley vectors, and quaternions—and provides consistent conversion routines between them. All computationally intensive functions can be transparently accelerated with [Numba](https://numba.pydata.org/) JIT compilation via the [pyConDec](https://github.com/eskoruppa/pyConDec) conditional-decorator utility; if Numba is not installed the functions run as plain NumPy code with no changes required. 
 
 ---
 
 ## Installation
 
-### From source
+> **The package is distributed on PyPI as `so3tools` and can be imported as either `so3` or `so3tools`**—i.e. `pip install so3tools`, then `import so3` *or* `import so3tools` (both names refer to the same package).
 
-Clone the repository and install, then install pyConDec from source:
+> 💡 **Installing [Numba](https://numba.pydata.org/) is strongly recommended.** SO3 works without it, but all numerically intensive routines run as plain (slower) NumPy code in that case. With Numba installed they are JIT-compiled to native machine code, typically giving a large speed-up on the hot paths. Every option below shows how to add it.
 
-```bash
-git clone https://github.com/eskoruppa/SO3.git
-cd SO3
-pip install .
-git clone https://github.com/eskoruppa/pyConDec.git
-cd pyConDec && pip install . && cd ..
-```
-
-To also enable optional Numba JIT acceleration:
+### Option 1 — Install from PyPI (recommended)
 
 ```bash
-pip install numba
+pip install so3tools
 ```
 
-Or install SO3 with all optional dependencies at once:
+This automatically pulls in all required dependencies (`numpy`, `scipy`, and `pycondec`). To include the recommended Numba acceleration, install the `numba` extra:
 
 ```bash
-pip install ".[all]"
-git clone https://github.com/eskoruppa/pyConDec.git
-cd pyConDec && pip install . && cd ..
+pip install "so3tools[numba]"
 ```
 
-### Dependencies
+(equivalently, `pip install so3tools numba`).
 
-| Dependency | Required | Notes |
-|------------|----------|-------|
-| `numpy` | **Yes** | Installed automatically by pip |
-| `pyConDec` | **Yes** | Conditional-decorator utility; install separately (see above) |
-| `numba` | No | Enables JIT acceleration of all hot-path functions |
+### Option 2 — Recursive clone + local install
 
-### Installing pyConDec
-
-pyConDec manages conditional Numba JIT decoration and must be installed alongside SO3. Clone and install it from source:
-
-```bash
-git clone https://github.com/eskoruppa/pyConDec.git
-cd pyConDec
-pip install .
-```
-
-### Alternative: recursive clone (submodule workflow)
-
-If you prefer to keep pyConDec as a bundled git submodule — for example when working on SO3 itself or in environments without internet access — clone with `--recurse-submodules` instead:
+Clone the repository with its `pyConDec` submodule and install locally. This is the simplest source-based workflow and needs no separate pyConDec step—the bundled submodule in `so3/pyConDec/` is picked up automatically:
 
 ```bash
 git clone --recurse-submodules -j8 https://github.com/eskoruppa/SO3.git
@@ -62,7 +36,47 @@ cd SO3
 pip install .
 ```
 
-In this case pyConDec does **not** need to be installed separately; the submodule in `so3/pyConDec/` takes priority automatically.
+Then add the recommended Numba acceleration:
+
+```bash
+pip install numba          # or:  pip install ".[numba]"
+```
+
+### Option 3 — Install pyConDec separately, then clone + install SO3
+
+Useful if you did a plain (non-recursive) clone, or want pyConDec managed independently. First install pyConDec—either from PyPI or from source:
+
+```bash
+# from PyPI (easiest)
+pip install pycondec
+
+# …or from source
+git clone https://github.com/eskoruppa/pyConDec.git
+cd pyConDec && pip install . && cd ..
+```
+
+Then clone and install SO3:
+
+```bash
+git clone https://github.com/eskoruppa/SO3.git
+cd SO3
+pip install .
+```
+
+And add the recommended Numba acceleration:
+
+```bash
+pip install numba
+```
+
+### Dependencies
+
+| Dependency | Required | Notes |
+|------------|----------|-------|
+| `numpy` | **Yes** | Installed automatically by pip |
+| `scipy` | **Yes** | Installed automatically by pip |
+| `pycondec` | **Yes** | Conditional-decorator utility; installed automatically from PyPI (Options 1), or provided via the git submodule / separate install (Options 2–3) |
+| `numba` | Recommended | Enables JIT acceleration of all hot-path functions; strongly recommended for performance |
 
 ---
 
@@ -74,7 +88,7 @@ In this case pyConDec does **not** need to be installed separately; the submodul
 - **Square-root rotation** `sqrt_rot`: compute the half-angle rotation
 - **Jacobians**: right and left Jacobians of the exponential map and their inverses (`right_jacobian`, `left_jacobian`, `inverse_right_jacobian`, `inverse_left_jacobian`)
 - **Midstep frame** `midstep`: midstep Euler vector between two frames
-- **Euler-vector unwrapping** `extend_euler`: unwrap a sequence of Euler vectors to remove 2π branch jumps
+- **Euler-vector unwrapping** `unwrap_euler`: unwrap a sequence of Euler vectors to remove 2π branch jumps
 
 ### Cayley map parameterization — SO(3)
 - `cayley2rotmat` / `rotmat2cayley`: convert between Cayley vectors and rotation matrices
@@ -96,7 +110,6 @@ In this case pyConDec does **not** need to be installed separately; the submodul
 ### Lie algebra utilities
 - **Hat map** `hat_map` / **vec map** `vec_map`: isomorphism between R³ and so(3) skew-symmetric matrices
 - **Generators** `generator1`, `generator2`, `generator3`: basis elements of so(3)
-- **Chained matrix product** `dots`: multiply an arbitrary list of matrices in sequence
 
 ### Rotation utilities
 - `rotmat_align_vector`: compute the rotation matrix that maps one 3-D vector onto another using the axis–angle representation
@@ -110,7 +123,7 @@ All numerically intensive functions are decorated with `cond_jit` from the bundl
 
 ```python
 import numpy as np
-import so3
+import so3          # or:  import so3tools  (same package, either name works)
 
 # Euler vector → rotation matrix → back
 omega = np.array([0.1, -0.2, 0.3])
