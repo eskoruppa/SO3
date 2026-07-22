@@ -953,8 +953,8 @@ def se3_eulers2rotmats_single(X: np.ndarray) -> np.ndarray:
       - a batch of SE(3) matrices for (..., 6) input, with shape (..., M, M)
         where M is whatever se3_euler2rotmat returns (typically 4x4 or 3x4).
     """
-    X = np.asarray(X)
-    
+    X = np.asarray(X, dtype=float)
+
     if X.ndim == 1:
         if X.shape[0] != 6:
             raise ValueError(f"Expected shape (6,), got {X.shape}.")
@@ -992,7 +992,7 @@ def se3_rotmats2eulers_single(se3: np.ndarray) -> np.ndarray:
       - shape (6,) for a single matrix
       - shape (..., 6) for a batch
     """
-    se3 = np.asarray(se3)
+    se3 = np.asarray(se3, dtype=float)
 
     if se3.ndim == 2:
         return se3_rotmat2euler_single(se3)
