@@ -8,6 +8,7 @@ from .conversions import _splittransform_algebra2group_sv, _splittransform_group
 from .Euler import _euler2rotmat_sv, _sqrt_rot_sv, _se3_rotmat2euler_sv
 from .generators import _hat_map_sv
 from ._pycondec import cond_jit
+from ._shapecheck import _check_vector_batch, _check_matrix_batch
 
 from .Euler import euler2rotmat_single, sqrt_rot_single, se3_rotmat2euler_single
 from .conversions import splittransform_algebra2group_single, splittransform_group2algebra_single
@@ -321,6 +322,7 @@ def se3_inverse_batch(g: np.ndarray) -> np.ndarray:
     inv : (..., 4, 4)
     """
     g = np.asarray(g, dtype=float)
+    _check_matrix_batch(g, 4, "se3_inverse_batch")
     if g.ndim == 2:
         return _se3_inverse_sv(g)
     shape = g.shape[:-2]
@@ -342,6 +344,8 @@ def se3_triads2rotmat_batch(tau1: np.ndarray, tau2: np.ndarray) -> np.ndarray:
     """
     tau1 = np.asarray(tau1, dtype=float)
     tau2 = np.asarray(tau2, dtype=float)
+    _check_matrix_batch(tau1, 4, "se3_triads2rotmat_batch")
+    _check_matrix_batch(tau2, 4, "se3_triads2rotmat_batch")
     if tau1.ndim == 2:
         return _se3_triads2rotmat_sv(tau1, tau2)
     shape = tau1.shape[:-2]
@@ -364,6 +368,8 @@ def se3_triads2euler_batch(tau1: np.ndarray, tau2: np.ndarray) -> np.ndarray:
     """
     tau1 = np.asarray(tau1, dtype=float)
     tau2 = np.asarray(tau2, dtype=float)
+    _check_matrix_batch(tau1, 4, "se3_triads2euler_batch")
+    _check_matrix_batch(tau2, 4, "se3_triads2euler_batch")
     if tau1.ndim == 2:
         return _se3_triads2euler_sv(tau1, tau2)
     shape = tau1.shape[:-2]
@@ -385,6 +391,7 @@ def se3_midstep2triad_batch(midstep_euler: np.ndarray) -> np.ndarray:
     triad_euler : (..., 6)
     """
     midstep_euler = np.asarray(midstep_euler, dtype=float)
+    _check_vector_batch(midstep_euler, 6, "se3_midstep2triad_batch")
     if midstep_euler.ndim == 1:
         return _se3_midstep2triad_sv(midstep_euler)
     shape = midstep_euler.shape[:-1]
@@ -405,6 +412,7 @@ def se3_triad2midstep_batch(triad_euler: np.ndarray) -> np.ndarray:
     midstep_euler : (..., 6)
     """
     triad_euler = np.asarray(triad_euler, dtype=float)
+    _check_vector_batch(triad_euler, 6, "se3_triad2midstep_batch")
     if triad_euler.ndim == 1:
         return _se3_triad2midstep_sv(triad_euler)
     shape = triad_euler.shape[:-1]
@@ -426,6 +434,8 @@ def se3_triadxrotmat_midsteptrans_batch(tau1: np.ndarray, g: np.ndarray) -> np.n
     """
     tau1 = np.asarray(tau1, dtype=float)
     g = np.asarray(g, dtype=float)
+    _check_matrix_batch(tau1, 4, "se3_triadxrotmat_midsteptrans_batch")
+    _check_matrix_batch(g, 4, "se3_triadxrotmat_midsteptrans_batch")
     if tau1.ndim == 2:
         return _se3_triadxrotmat_midsteptrans_sv(tau1, g)
     shape = tau1.shape[:-2]
@@ -448,6 +458,8 @@ def se3_triads2rotmat_midsteptrans_batch(tau1: np.ndarray, tau2: np.ndarray) -> 
     """
     tau1 = np.asarray(tau1, dtype=float)
     tau2 = np.asarray(tau2, dtype=float)
+    _check_matrix_batch(tau1, 4, "se3_triads2rotmat_midsteptrans_batch")
+    _check_matrix_batch(tau2, 4, "se3_triads2rotmat_midsteptrans_batch")
     if tau1.ndim == 2:
         return _se3_triads2rotmat_midsteptrans_sv(tau1, tau2)
     shape = tau1.shape[:-2]
@@ -469,6 +481,7 @@ def se3_transformation_triad2midstep_batch(g: np.ndarray) -> np.ndarray:
     midg : (..., 4, 4)
     """
     g = np.asarray(g, dtype=float)
+    _check_matrix_batch(g, 4, "se3_transformation_triad2midstep_batch")
     if g.ndim == 2:
         return _se3_transformation_triad2midstep_sv(g)
     shape = g.shape[:-2]
@@ -489,6 +502,7 @@ def se3_transformation_midstep2triad_batch(midg: np.ndarray) -> np.ndarray:
     g : (..., 4, 4)
     """
     midg = np.asarray(midg, dtype=float)
+    _check_matrix_batch(midg, 4, "se3_transformation_midstep2triad_batch")
     if midg.ndim == 2:
         return _se3_transformation_midstep2triad_sv(midg)
     shape = midg.shape[:-2]
@@ -512,6 +526,7 @@ def se3_algebra2group_lintrans_batch(
     Trans : (..., 6, 6)
     """
     groundstate_algebra = np.asarray(groundstate_algebra, dtype=float)
+    _check_vector_batch(groundstate_algebra, 6, "se3_algebra2group_lintrans_batch")
     if groundstate_algebra.ndim == 1:
         return _se3_algebra2group_lintrans_sv(groundstate_algebra, translation_as_midstep)
     shape = groundstate_algebra.shape[:-1]
@@ -535,6 +550,7 @@ def se3_group2algebra_lintrans_batch(
     Trans : (..., 6, 6)
     """
     groundstate_group = np.asarray(groundstate_group, dtype=float)
+    _check_vector_batch(groundstate_group, 6, "se3_group2algebra_lintrans_batch")
     if groundstate_group.ndim == 1:
         return _se3_group2algebra_lintrans_sv(groundstate_group, translation_as_midstep)
     shape = groundstate_group.shape[:-1]
@@ -562,6 +578,8 @@ def se3_algebra2group_stiffmat_batch(
     """
     groundstate_algebra = np.asarray(groundstate_algebra, dtype=float)
     stiff_algebra = np.asarray(stiff_algebra, dtype=float)
+    _check_vector_batch(groundstate_algebra, 6, "se3_algebra2group_stiffmat_batch")
+    _check_matrix_batch(stiff_algebra, 6, "se3_algebra2group_stiffmat_batch")
     if groundstate_algebra.ndim == 1:
         return _se3_algebra2group_stiffmat_sv(groundstate_algebra, stiff_algebra, translation_as_midstep)
     shape = groundstate_algebra.shape[:-1]
@@ -590,6 +608,8 @@ def se3_group2algebra_stiffmat_batch(
     """
     groundstate_group = np.asarray(groundstate_group, dtype=float)
     stiff_group = np.asarray(stiff_group, dtype=float)
+    _check_vector_batch(groundstate_group, 6, "se3_group2algebra_stiffmat_batch")
+    _check_matrix_batch(stiff_group, 6, "se3_group2algebra_stiffmat_batch")
     if groundstate_group.ndim == 1:
         return _se3_group2algebra_stiffmat_sv(groundstate_group, stiff_group, translation_as_midstep)
     shape = groundstate_group.shape[:-1]

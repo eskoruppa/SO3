@@ -3,6 +3,7 @@
 import numpy as np
 
 from ._pycondec import cond_jit
+from ._shapecheck import _check_vector_batch, _check_matrix_batch
 
 
 ##########################################################################################################
@@ -68,6 +69,7 @@ def hat_map_batch(x: np.ndarray) -> np.ndarray:
         np.ndarray: so(3) element(s), shape (..., 3, 3).
     """
     x = np.asarray(x, dtype=float)
+    _check_vector_batch(x, 3, "hat_map_batch")
     if x.ndim == 1:
         return _hat_map_sv(x)
     orig_shape = x.shape
@@ -89,6 +91,7 @@ def vec_map_batch(X: np.ndarray) -> np.ndarray:
         np.ndarray: rotation vector(s), shape (..., 3).
     """
     X = np.asarray(X, dtype=float)
+    _check_matrix_batch(X, 3, "vec_map_batch")
     if X.ndim == 2:
         return _vec_map_sv(X)
     orig_shape = X.shape

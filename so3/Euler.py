@@ -5,6 +5,7 @@ from __future__ import annotations
 import numpy as np
 import math
 from ._pycondec import cond_jit
+from ._shapecheck import _check_vector_batch, _check_matrix_batch
 from .generators import _hat_map_sv
 
 ##########################################################################################################
@@ -338,6 +339,7 @@ def euler2rotmat_batch(Omega: np.ndarray) -> np.ndarray:
         np.ndarray: Rotation matrix/matrices of shape (..., 3, 3).
     """
     Omega = np.asarray(Omega, dtype=float)
+    _check_vector_batch(Omega, 3, "euler2rotmat_batch")
     if Omega.ndim == 1:
         return _euler2rotmat_sv(Omega)
     orig_shape = Omega.shape
@@ -363,6 +365,7 @@ def rotmat2euler_batch(R: np.ndarray) -> np.ndarray:
         np.ndarray: Euler vector(s) of shape (..., 3).
     """
     R = np.asarray(R, dtype=float)
+    _check_matrix_batch(R, 3, "rotmat2euler_batch")
     if R.ndim == 2:
         return _rotmat2euler_sv(R)
     orig_shape = R.shape          # (..., 3, 3)
@@ -388,6 +391,7 @@ def sqrt_rot_batch(R: np.ndarray) -> np.ndarray:
         np.ndarray: Square-root rotation matrix/matrices of shape (..., 3, 3).
     """
     R = np.asarray(R, dtype=float)
+    _check_matrix_batch(R, 3, "sqrt_rot_batch")
     if R.ndim == 2:
         return _sqrt_rot_sv(R)
     orig_shape = R.shape
@@ -411,6 +415,8 @@ def midstep_batch(triad1: np.ndarray, triad2: np.ndarray) -> np.ndarray:
     """
     triad1 = np.asarray(triad1, dtype=float)
     triad2 = np.asarray(triad2, dtype=float)
+    _check_matrix_batch(triad1, 3, "midstep_batch")
+    _check_matrix_batch(triad2, 3, "midstep_batch")
     if triad1.ndim == 2:
         return _midstep_sv(triad1, triad2)
     orig_shape = triad1.shape
@@ -444,6 +450,7 @@ def right_jacobian_batch(Omega: np.ndarray) -> np.ndarray:
         Right Jacobian matrix/matrices.
     """
     Omega = np.asarray(Omega, dtype=float)
+    _check_vector_batch(Omega, 3, "right_jacobian_batch")
     if Omega.ndim == 1:
         return _right_jacobian_sv(Omega)
     orig_shape = Omega.shape
@@ -472,6 +479,7 @@ def left_jacobian_batch(Omega: np.ndarray) -> np.ndarray:
         Left Jacobian matrix/matrices.
     """
     Omega = np.asarray(Omega, dtype=float)
+    _check_vector_batch(Omega, 3, "left_jacobian_batch")
     if Omega.ndim == 1:
         return _left_jacobian_sv(Omega)
     orig_shape = Omega.shape
@@ -496,6 +504,7 @@ def inverse_right_jacobian_batch(Omega: np.ndarray) -> np.ndarray:
         Inverse of the right Jacobian matrix/matrices.
     """
     Omega = np.asarray(Omega, dtype=float)
+    _check_vector_batch(Omega, 3, "inverse_right_jacobian_batch")
     if Omega.ndim == 1:
         return _inverse_right_jacobian_sv(Omega)
     orig_shape = Omega.shape
@@ -520,6 +529,7 @@ def inverse_left_jacobian_batch(Omega: np.ndarray) -> np.ndarray:
         Inverse of the left Jacobian matrix/matrices.
     """
     Omega = np.asarray(Omega, dtype=float)
+    _check_vector_batch(Omega, 3, "inverse_left_jacobian_batch")
     if Omega.ndim == 1:
         return _inverse_left_jacobian_sv(Omega)
     orig_shape = Omega.shape
@@ -546,6 +556,7 @@ def se3_euler2rotmat_batch(Omega: np.ndarray, rotation_first: bool = True) -> np
         np.ndarray: SE(3) matrix/matrices of shape (..., 4, 4).
     """
     Omega = np.asarray(Omega, dtype=float)
+    _check_vector_batch(Omega, 6, "se3_euler2rotmat_batch")
     if Omega.ndim == 1:
         return _se3_euler2rotmat_sv(Omega, rotation_first)
     orig_shape = Omega.shape
@@ -568,6 +579,7 @@ def se3_rotmat2euler_batch(R: np.ndarray, rotation_first: bool = True) -> np.nda
         np.ndarray: SE(3) coordinate vector(s) of shape (..., 6).
     """
     R = np.asarray(R, dtype=float)
+    _check_matrix_batch(R, 4, "se3_rotmat2euler_batch")
     if R.ndim == 2:
         return _se3_rotmat2euler_sv(R, rotation_first)
     orig_shape = R.shape

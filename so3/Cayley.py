@@ -5,6 +5,7 @@ import numpy as np
 from .generators import _hat_map_sv, _vec_map_sv
 from .generators import hat_map_single, vec_map_single
 from ._pycondec import cond_jit
+from ._shapecheck import _check_vector_batch, _check_matrix_batch
 
 ##########################################################################################################
 ############### SO3 Methods ##############################################################################
@@ -114,6 +115,7 @@ def cayley2rotmat_batch(cayley: np.ndarray) -> np.ndarray:
         np.ndarray: rotation matrix/matrices, shape (..., 3, 3).
     """
     cayley = np.asarray(cayley, dtype=float)
+    _check_vector_batch(cayley, 3, "cayley2rotmat_batch")
     if cayley.ndim == 1:
         return _cayley2rotmat_sv(cayley)
     orig_shape = cayley.shape
@@ -134,6 +136,7 @@ def rotmat2cayley_batch(rotmat: np.ndarray) -> np.ndarray:
         np.ndarray: Cayley vector(s), shape (..., 3).
     """
     rotmat = np.asarray(rotmat, dtype=float)
+    _check_matrix_batch(rotmat, 3, "rotmat2cayley_batch")
     if rotmat.ndim == 2:
         return _rotmat2cayley_sv(rotmat)
     orig_shape = rotmat.shape
@@ -159,6 +162,7 @@ def se3_cayley2rotmat_batch(Omega: np.ndarray, rotation_first: bool = True) -> n
         np.ndarray: SE(3) matrix/matrices, shape (..., 4, 4).
     """
     Omega = np.asarray(Omega, dtype=float)
+    _check_vector_batch(Omega, 6, "se3_cayley2rotmat_batch")
     if Omega.ndim == 1:
         return _se3_cayley2rotmat_sv(Omega, rotation_first)
     orig_shape = Omega.shape
@@ -181,6 +185,7 @@ def se3_rotmat2cayley_batch(R: np.ndarray, rotation_first: bool = True) -> np.nd
         np.ndarray: Cayley SE(3) vector(s), shape (..., 6).
     """
     R = np.asarray(R, dtype=float)
+    _check_matrix_batch(R, 4, "se3_rotmat2cayley_batch")
     if R.ndim == 2:
         return _se3_rotmat2cayley_sv(R, rotation_first)
     orig_shape = R.shape

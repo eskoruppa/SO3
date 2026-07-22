@@ -6,6 +6,7 @@ from .Euler import _inverse_right_jacobian_sv, _right_jacobian_sv
 
 from .generators import _hat_map_sv as hat_map
 from ._pycondec import cond_jit
+from ._shapecheck import _check_vector_batch, _check_matrix_batch
 
 
 ##########################################################################################################
@@ -203,6 +204,7 @@ def cayley2euler_batch(cayley: np.ndarray) -> np.ndarray:
         np.ndarray: Euler vector(s) with the same shape as the input.
     """
     cayley = np.asarray(cayley, dtype=float)
+    _check_vector_batch(cayley, 3, "cayley2euler_batch")
     if cayley.ndim == 1:
         return _cayley2euler_sv(cayley)
     orig_shape = cayley.shape
@@ -225,6 +227,7 @@ def euler2cayley_batch(euler: np.ndarray) -> np.ndarray:
         np.ndarray: Cayley vector(s) with the same shape as the input.
     """
     euler = np.asarray(euler, dtype=float)
+    _check_vector_batch(euler, 3, "euler2cayley_batch")
     if euler.ndim == 1:
         return _euler2cayley_sv(euler)
     orig_shape = euler.shape
@@ -247,6 +250,7 @@ def cayley2euler_factor_batch(cayley: np.ndarray):
         float or np.ndarray: Factor(s); scalar for a single vector, shape (...,) for batch input.
     """
     cayley = np.asarray(cayley, dtype=float)
+    _check_vector_batch(cayley, 3, "cayley2euler_factor_batch")
     if cayley.ndim == 1:
         return _cayley2euler_factor_sv(cayley)
     orig_shape = cayley.shape
@@ -269,6 +273,7 @@ def euler2cayley_factor_batch(euler: np.ndarray):
         float or np.ndarray: Factor(s); scalar for a single vector, shape (...,) for batch input.
     """
     euler = np.asarray(euler, dtype=float)
+    _check_vector_batch(euler, 3, "euler2cayley_factor_batch")
     if euler.ndim == 1:
         return _euler2cayley_factor_sv(euler)
     orig_shape = euler.shape
@@ -294,6 +299,7 @@ def cayley2euler_linearexpansion_batch(cayley_gs: np.ndarray) -> np.ndarray:
         np.ndarray: Jacobian matrix (matrices) of shape (..., 3, 3).
     """
     cayley_gs = np.asarray(cayley_gs, dtype=float)
+    _check_vector_batch(cayley_gs, 3, "cayley2euler_linearexpansion_batch")
     if cayley_gs.ndim == 1:
         return _cayley2euler_linearexpansion_sv(cayley_gs)
     orig_shape = cayley_gs.shape
@@ -315,6 +321,7 @@ def euler2cayley_linearexpansion_batch(euler_gs: np.ndarray) -> np.ndarray:
         np.ndarray: Jacobian matrix (matrices) of shape (..., 3, 3).
     """
     euler_gs = np.asarray(euler_gs, dtype=float)
+    _check_vector_batch(euler_gs, 3, "euler2cayley_linearexpansion_batch")
     if euler_gs.ndim == 1:
         return _euler2cayley_linearexpansion_sv(euler_gs)
     orig_shape = euler_gs.shape
@@ -344,6 +351,7 @@ def splittransform_group2algebra_batch(Theta_0: np.ndarray) -> np.ndarray:
         np.ndarray: Transformation matrix T of shape (..., 3, 3).
     """
     Theta_0 = np.asarray(Theta_0, dtype=float)
+    _check_vector_batch(Theta_0, 3, "splittransform_group2algebra_batch")
     if Theta_0.ndim == 1:
         return _splittransform_group2algebra_sv(Theta_0)
     orig_shape = Theta_0.shape
@@ -368,6 +376,7 @@ def splittransform_algebra2group_batch(Theta_0: np.ndarray) -> np.ndarray:
         np.ndarray: Transformation matrix T' of shape (..., 3, 3).
     """
     Theta_0 = np.asarray(Theta_0, dtype=float)
+    _check_vector_batch(Theta_0, 3, "splittransform_algebra2group_batch")
     if Theta_0.ndim == 1:
         return _splittransform_algebra2group_sv(Theta_0)
     orig_shape = Theta_0.shape
