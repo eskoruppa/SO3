@@ -263,6 +263,24 @@ def mat2quat(mat) -> np.ndarray:
 
 
 def quats2mats(quats: np.ndarray, use_vectorized: bool = True) -> np.ndarray:
+    """Convert quaternion(s) to rotation matrix(es).
+
+    Accepts any shape ``(..., 4)`` and returns shape ``(..., 3, 3)``; a single
+    quaternion ``(4,)`` yields a single ``(3, 3)`` matrix. Quaternions are given
+    as ``[w, i, j, k]`` and are normalized to unit length internally, so non-unit
+    input still yields a proper rotation matrix (a zero quaternion is left as-is).
+
+    Args:
+        quats (np.ndarray): Quaternion(s), last dimension must be 4.
+        use_vectorized (bool): If True (default), use the batched NumPy
+            implementation :func:`quats2mats_vectorized`. If False, use the
+            legacy per-element loop over :func:`quat2mat_numba`. Both paths give
+            identical results; the vectorized one is substantially faster for
+            batches and validates the input shape.
+
+    Returns:
+        np.ndarray: Rotation matrix(es) of shape ``quats.shape[:-1] + (3, 3)``.
+    """
     if use_vectorized:
         return quats2mats_vectorized(quats)
 
@@ -281,6 +299,25 @@ def quats2mats(quats: np.ndarray, use_vectorized: bool = True) -> np.ndarray:
 
 
 def mats2quats(mats: np.ndarray, use_vectorized: bool = True) -> np.ndarray:
+    """Convert rotation matrix(es) to quaternion(s).
+
+    Accepts any shape ``(..., 3, 3)`` and returns shape ``(..., 4)``; a single
+    matrix ``(3, 3)`` yields a single quaternion ``(4,)``. Returned quaternions
+    are ``[w, x, y, z]`` and are normalized to unit length. The component of
+    largest magnitude is solved for first, which keeps the conversion
+    numerically stable across the whole rotation range.
+
+    Args:
+        mats (np.ndarray): Rotation matrix(es), last two dimensions must be ``(3, 3)``.
+        use_vectorized (bool): If True (default), use the batched NumPy
+            implementation :func:`mats2quats_vectorized`. If False, use the
+            legacy per-element loop over :func:`mat2quat_numba`. Both paths give
+            identical results; the vectorized one is substantially faster for
+            batches and validates the input shape.
+
+    Returns:
+        np.ndarray: Unit quaternion(s) of shape ``mats.shape[:-2] + (4,)``.
+    """
     if use_vectorized:
         return mats2quats_vectorized(mats)
 
